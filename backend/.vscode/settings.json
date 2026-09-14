@@ -1,0 +1,13 @@
+{
+    "editor.formatOnSave": true,
+
+    "[java]": {
+      "editor.defaultFormatter": "redhat.java"
+    },
+
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    },
+
+    "java.format.settings.url": "${workspaceFolder}/.vscode/java-style.xml"
+  }
