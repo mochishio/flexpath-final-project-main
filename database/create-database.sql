@@ -86,7 +86,7 @@ insert into notes
 values ('React Router', '', false, 'user', (select id from categories where name = 'React'));
 -- public/private collections
 insert into collections (name, is_public, username) values ('Read Later', false, 'user');
-insert into collections (name, is_public, username) values ('My Bast 2026', true, 'user');
+insert into collections (name, is_public, username) values ('My Best 2026', true, 'user');
 -- many-to-many
 insert into collection_notes (collection_id, note_id) values (1, 1);
 insert into collection_notes (collection_id, note_id) values (1, 2);
