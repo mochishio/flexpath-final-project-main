@@ -12,8 +12,7 @@ public class Note {
     private String username;
     private Integer categoryId;
 
-    public Note(String title) {
-        this.title = title;
+    public Note() {
     }
 
     // getters
@@ -50,6 +49,18 @@ public class Note {
     }
 
     // setters
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     public void setTitle(String title) {
         this.title = title;
     }
