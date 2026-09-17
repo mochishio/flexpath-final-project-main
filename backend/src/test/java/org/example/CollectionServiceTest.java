@@ -1,0 +1,218 @@
+package org.example;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.example.daos.CollectionDao;
+import org.example.models.Collection;
+import org.example.services.CollectionService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+class CollectionServiceTest {
+
+    private CollectionDao collectionDao;
+    private CollectionService collectionService;
+    private String COLLECTION_NAME = "Read Later";
+    private Collection collection;
+
+    @BeforeEach
+    void setUp() {
+        collection = new Collection();
+        collection.setId(1);
+        collection.setName(COLLECTION_NAME);
+        collection.setDescription("");
+        collection.setIsPublic(true);
+        collection.setUsername("user");
+
+        collectionDao = Mockito.mock(CollectionDao.class);
+        collectionService = new CollectionService(collectionDao);
+    }
+
+    @Test
+    void getAll_shouldReturnAllCollections() {
+        Collection existingCollection = new Collection();
+        existingCollection.setId(2);
+        existingCollection.setName("My Best 2026");
+        existingCollection.setDescription("description");
+        existingCollection.setUsername("admin");
+
+        when(collectionDao.getAll()).thenReturn(
+                List.of(collection, existingCollection));
+
+        List<Collection> result = collectionService.getAll();
+        assertEquals(2, result.size());
+        // 1
+        assertEquals(1, result.get(0).getId());
+        assertEquals(COLLECTION_NAME, result.get(0).getName());
+        assertEquals("", result.get(0).getDescription());
+        assertTrue(result.get(0).getIsPublic());
+        assertEquals("user", result.get(0).getUsername());
+        // 2
+        assertEquals(2, result.get(1).getId());
+        assertEquals("My Best 2026", result.get(1).getName());
+        assertEquals("description", result.get(1).getDescription());
+        assertFalse(result.get(1).getIsPublic());
+        assertEquals("admin", result.get(1).getUsername());
+
+        verify(collectionDao).getAll();
+    }
+
+    @Test
+    void getById_shouldReturnCollection_whenCollectionExists() {
+        when(collectionDao.getById(1)).thenReturn(
+                Optional.ofNullable(collection));
+
+        Collection result = collectionService.getById(1);
+        assertEquals(1, result.getId());
+        assertEquals(COLLECTION_NAME, result.getName());
+        assertEquals("", result.getDescription());
+        assertEquals(true, result.getIsPublic());
+        assertEquals("user", result.getUsername());
+
+        verify(collectionDao).getById(1);
+    }
+
+    @Test
+    void getById_shouldThrowNotFound_whenCollectionDoesNotExist() {
+        when(collectionDao.getById(100)).thenReturn(
+                Optional.empty());
+
+        ResponseStatusException result = assertThrows(
+                ResponseStatusException.class,
+                () -> collectionService.getById(100));
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+        verify(collectionDao).getById(100);
+    }
+
+    @Test
+    void create_shouldCreateCollection_whenInputIsValid() {
+        when(collectionDao.create(collection)).thenReturn(collection);
+
+        Collection result = collectionService.create(collection);
+        assertEquals(1, result.getId());
+        assertEquals(COLLECTION_NAME, result.getName());
+        assertEquals("", result.getDescription());
+        assertEquals(true, result.getIsPublic());
+        assertEquals("user", result.getUsername());
+
+        verify(collectionDao).create(collection);
+    }
+
+    @Test
+    void create_shouldThrowBadRequest_whenNameIsBlank() {
+        Collection emptyNameCollection = new Collection();
+        emptyNameCollection.setId(2);
+        emptyNameCollection.setName("");
+        emptyNameCollection.setUsername("user");
+
+        ResponseStatusException result = assertThrows(
+                ResponseStatusException.class,
+                () -> collectionService.create(emptyNameCollection));
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        verify(collectionDao, never()).create(emptyNameCollection);
+    }
+
+    @Test
+    void create_shouldThrowBadRequest_whenUsernameIsBlank() {
+        Collection emptyUsernameCollection = new Collection();
+        emptyUsernameCollection.setId(2);
+        emptyUsernameCollection.setName("My Best 2026");
+        emptyUsernameCollection.setUsername("");
+
+        ResponseStatusException result = assertThrows(
+                ResponseStatusException.class,
+                () -> collectionService.create(emptyUsernameCollection));
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        verify(collectionDao, never()).create(emptyUsernameCollection);
+    }
+
+    @Test
+    void update_shouldReturnUpdatedCollection_whenCollectionExists() {
+        Collection updatedCollection = new Collection();
+        updatedCollection.setId(1);
+        updatedCollection.setName("My Best 2026");
+        updatedCollection.setDescription("description");
+        updatedCollection.setIsPublic(false);
+        updatedCollection.setUsername("admin");
+
+        when(collectionDao.getById(1)).thenReturn(Optional.of(collection));
+        when(collectionDao.update(1, updatedCollection)).thenReturn(updatedCollection);
+
+        Collection result = collectionService.update(1, updatedCollection);
+        assertEquals(1, result.getId());
+        assertEquals("My Best 2026", result.getName());
+        assertEquals("description", result.getDescription());
+        assertFalse(result.getIsPublic());
+        assertEquals("admin", result.getUsername());
+
+        verify(collectionDao).getById(1);
+        verify(collectionDao).update(1, updatedCollection);
+    }
+
+    @Test
+    void update_shouldThrowNotFound_whenCollectionDoesNotExist() {
+        Collection updatedCollection = new Collection();
+        updatedCollection.setName("My Best 2026");
+
+        when(collectionDao.getById(100)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> collectionService.update(100, updatedCollection));
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verify(collectionDao).getById(100);
+        verify(collectionDao, never()).update(100, updatedCollection);
+    }
+
+    @Test
+    void update_shouldThrowBadRequest_whenNameIsBlank() {
+        when(collectionDao.getById(1)).thenReturn(Optional.of(collection));
+
+        Collection updatedEmptyNameCollection = new Collection();
+        updatedEmptyNameCollection.setId(1);
+        updatedEmptyNameCollection.setName("");
+        updatedEmptyNameCollection.setDescription("description");
+        updatedEmptyNameCollection.setIsPublic(false);
+        updatedEmptyNameCollection.setUsername("user");
+
+        ResponseStatusException result = assertThrows(
+                ResponseStatusException.class,
+                () -> collectionService.update(1, updatedEmptyNameCollection));
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+
+        verify(collectionDao).getById(1);
+        verify(collectionDao, never()).update(1, updatedEmptyNameCollection);
+    }
+
+    @Test
+    void delete_shouldReturnDeletedRowCount_whenCollectionExists() {
+        when(collectionDao.delete(1)).thenReturn(1);
+
+        int deletedCount = collectionService.delete(1);
+        assertEquals(1, deletedCount);
+        verify(collectionDao).delete(1);
+    }
+
+    @Test
+    void delete_shouldThrowNotFound_whenCollectionDoesNotExist() {
+        when(collectionDao.delete(100)).thenReturn(0);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> collectionService.delete(100));
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verify(collectionDao).delete(100);
+    }
+}

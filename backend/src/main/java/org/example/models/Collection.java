@@ -11,8 +11,7 @@ public class Collection {
     private boolean isPublic;
     private String username;
 
-    public Collection(String name) {
-        this.name = name;
+    public Collection() {
     }
 
     // getters
@@ -45,6 +44,18 @@ public class Collection {
     }
 
     // setters
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     public void setName(String name) {
         this.name = name;
     }

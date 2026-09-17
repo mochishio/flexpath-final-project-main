@@ -1,0 +1,120 @@
+package org.example.daos;
+
+import org.example.models.Collection;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Component;
+
+import javax.sql.DataSource;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import java.util.Optional;
+
+@Component
+public class CollectionDao implements Dao<Collection> {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    public CollectionDao(DataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    private Collection mapCollection(ResultSet rset) throws SQLException {
+        Collection collection = new Collection();
+        collection.setId(rset.getInt("ID"));
+        collection.setCreatedAt(
+                rset.getTimestamp("CREATED_AT").toLocalDateTime());
+        collection.setUpdatedAt(
+                rset.getTimestamp("UPDATED_AT").toLocalDateTime());
+        collection.setName(rset.getString("NAME"));
+        collection.setDescription(rset.getString("DESCRIPTION"));
+        collection.setIsPublic(rset.getBoolean("IS_PUBLIC"));
+        collection.setUsername(rset.getString("USERNAME"));
+        return collection;
+    }
+
+    @Override
+    public List<Collection> getAll() {
+        String sql = "SELECT * FROM collections";
+
+        return jdbcTemplate.query(
+                sql,
+                (rset, rowNum) -> mapCollection(rset));
+    }
+
+    @Override
+    public Optional<Collection> getById(int id) {
+        String sql = "SELECT * FROM collections WHERE ID = ?";
+
+        try {
+            Collection collection = jdbcTemplate.queryForObject(
+                    sql,
+                    (rset, rowNum) -> mapCollection(rset),
+                    id);
+
+            return Optional.ofNullable(collection);
+
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Collection create(Collection collection) {
+        String sql = "INSERT INTO collections (name, description, is_public, username) VALUES (?, ?, ?, ?)";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(
+                    sql,
+                    Statement.RETURN_GENERATED_KEYS);
+
+            ps.setString(1, collection.getName());
+            ps.setString(2, collection.getDescription());
+            ps.setBoolean(3, collection.getIsPublic());
+            ps.setString(4, collection.getUsername());
+
+            return ps;
+        }, keyHolder);
+
+        if (keyHolder.getKey() == null) {
+            throw new IllegalStateException(
+                    "Failed to retrieve generated collection ID");
+        }
+
+        int id = keyHolder.getKey().intValue();
+
+        return getById(id)
+                .orElseThrow(() -> new IllegalStateException(
+                        "Created collection could not be retrieved"));
+    }
+
+    @Override
+    public Collection update(int id, Collection collection) {
+        String sql = "UPDATE collections SET name = ?, description = ?, is_public = ? WHERE ID = ?";
+
+        jdbcTemplate.update(
+                sql,
+                collection.getName(),
+                collection.getDescription(),
+                collection.getIsPublic(),
+                id);
+
+        return getById(id)
+                .orElseThrow(() -> new IllegalStateException(
+                        "Updated collection could not be retrieved"));
+    }
+
+    @Override
+    public int delete(int id) {
+        String sql = "DELETE FROM collections WHERE ID = ?";
+
+        return jdbcTemplate.update(sql, id);
+    }
+}
