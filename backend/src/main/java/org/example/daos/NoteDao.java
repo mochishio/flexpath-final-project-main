@@ -1,5 +1,6 @@
 package org.example.daos;
 
+import org.example.mappers.NoteRowMapper;
 import org.example.models.Note;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,8 +10,6 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
@@ -19,24 +18,10 @@ import java.util.Optional;
 public class NoteDao implements Dao<Note> {
 
     private final JdbcTemplate jdbcTemplate;
+    private final NoteRowMapper noteRowMapper = new NoteRowMapper();
 
     public NoteDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
-
-    private Note mapNote(ResultSet rset) throws SQLException {
-        Note note = new Note();
-        note.setId(rset.getInt("ID"));
-        note.setCreatedAt(
-                rset.getTimestamp("CREATED_AT").toLocalDateTime());
-        note.setUpdatedAt(
-                rset.getTimestamp("UPDATED_AT").toLocalDateTime());
-        note.setTitle(rset.getString("TITLE"));
-        note.setContent(rset.getString("CONTENT"));
-        note.setIsPublic(rset.getBoolean("IS_PUBLIC"));
-        note.setUsername(rset.getString("USERNAME"));
-        note.setCategoryId(rset.getInt("CATEGORY_ID"));
-        return note;
     }
 
     @Override
@@ -45,7 +30,7 @@ public class NoteDao implements Dao<Note> {
 
         return jdbcTemplate.query(
                 sql,
-                (rset, rowNum) -> mapNote(rset));
+                noteRowMapper);
     }
 
     @Override
@@ -55,7 +40,7 @@ public class NoteDao implements Dao<Note> {
         try {
             Note note = jdbcTemplate.queryForObject(
                     sql,
-                    (rset, rowNum) -> mapNote(rset),
+                    noteRowMapper,
                     id);
 
             return Optional.ofNullable(note);
