@@ -8,9 +8,7 @@ public class CollectionNote {
     private int collectionId;
     private int noteId;
 
-    public CollectionNote(int collectionId, int noteId) {
-        this.collectionId = collectionId;
-        this.noteId = noteId;
+    public CollectionNote() {
     }
 
     // getters
@@ -31,11 +29,19 @@ public class CollectionNote {
     }
 
     // setters
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public void setCollectionId(int collectionId) {
         this.collectionId = collectionId;
     }
 
     public void setNoteId(int noteId) {
         this.noteId = noteId;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

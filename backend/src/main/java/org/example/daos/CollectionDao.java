@@ -1,6 +1,8 @@
 package org.example.daos;
 
+import org.example.mappers.NoteRowMapper;
 import org.example.models.Collection;
+import org.example.models.Note;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -19,6 +21,7 @@ import java.util.Optional;
 public class CollectionDao implements Dao<Collection> {
 
     private final JdbcTemplate jdbcTemplate;
+    private final NoteRowMapper noteRowMapper = new NoteRowMapper();
 
     public CollectionDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -116,5 +119,41 @@ public class CollectionDao implements Dao<Collection> {
         String sql = "DELETE FROM collections WHERE ID = ?";
 
         return jdbcTemplate.update(sql, id);
+    }
+
+    // ======================
+    // CollectionNote
+    // ======================
+    public boolean existsNoteInCollection(int collectionId, int noteId) {
+        String sql = """
+                SELECT COUNT(*) FROM collection_notes WHERE collection_id = ? AND note_id = ?
+                """;
+        Integer count = jdbcTemplate.queryForObject(
+                sql,
+                Integer.class,
+                collectionId,
+                noteId);
+        return count != null && count > 0;
+    }
+
+    public List<Note> getAllNotes(int collectionId) {
+        String sql = """
+                SELECT n.* FROM notes n JOIN collection_notes cn ON n.id = cn.note_id WHERE cn.collection_id = ?
+                """;
+        return jdbcTemplate.query(
+                sql,
+                noteRowMapper,
+                collectionId);
+    }
+
+    public List<Note> addNoteToCollection(int collectionId, int noteId) {
+        String sql = "INSERT INTO collection_notes (collection_id, note_id) VALUES (?, ?)";
+        jdbcTemplate.update(sql, collectionId, noteId);
+        return getAllNotes(collectionId);
+    }
+
+    public int removeNoteFromCollection(int collectionId, int noteId) {
+        String sql = "DELETE FROM collection_notes WHERE collection_id = ? AND note_id = ?";
+        return jdbcTemplate.update(sql, collectionId, noteId);
     }
 }

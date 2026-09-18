@@ -1,7 +1,9 @@
 package org.example.services;
 
 import org.example.daos.CollectionDao;
+import org.example.daos.NoteDao;
 import org.example.models.Collection;
+import org.example.models.Note;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -12,6 +14,12 @@ import java.util.List;
 public class CollectionService {
 
     private final CollectionDao collectionDao;
+    private final NoteDao noteDao;
+
+    public CollectionService(CollectionDao collectionDao, NoteDao noteDao) {
+        this.collectionDao = collectionDao;
+        this.noteDao = noteDao;
+    }
 
     private void validateName(Collection collection) {
         if (collection.getName() == null || collection.getName().isBlank()) {
@@ -27,10 +35,6 @@ public class CollectionService {
                     HttpStatus.BAD_REQUEST,
                     "Username is required");
         }
-    }
-
-    public CollectionService(CollectionDao collectionDao) {
-        this.collectionDao = collectionDao;
     }
 
     /**
@@ -97,4 +101,63 @@ public class CollectionService {
 
         return rows;
     }
+
+    // ======================
+    // CollectionNote
+    // ======================
+    /**
+     * Gets all notes in a collection.
+     *
+     * @return A list of all notes.
+     */
+    public List<Note> getAllNotes(int collectionId) {
+        getById(collectionId);
+        return collectionDao.getAllNotes(collectionId);
+    }
+
+    /**
+     * Adds a note to a collection.
+     *
+     * @param collectionId The collection id.
+     * @param noteId       The note id.
+     * @return A list of notes inside the collection.
+     */
+    public List<Note> addNoteToCollection(int collectionId, int noteId) {
+        // Collection existence check
+        getById(collectionId);
+
+        // Note existence check
+        noteDao.getById(noteId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Note not found"));
+
+        if (collectionDao.existsNoteInCollection(collectionId, noteId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Note is already in the collection");
+        }
+        return collectionDao.addNoteToCollection(collectionId, noteId);
+    }
+
+    /**
+     * Removes a note from a collection.
+     *
+     * @param collection_id The collection id.
+     * @param noteId        The note id.
+     * @return The number of deleted rows.
+     */
+    public int removeNoteFromCollection(int collectionId, int noteId) {
+        getById(collectionId);
+        int rows = collectionDao.removeNoteFromCollection(
+                collectionId,
+                noteId);
+        if (rows == 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Note is not in the collection");
+        }
+        return rows;
+    }
+
 }
