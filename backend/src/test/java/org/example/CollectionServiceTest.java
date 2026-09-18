@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.example.daos.CollectionDao;
+import org.example.daos.NoteDao;
 import org.example.models.Collection;
+import org.example.models.Note;
 import org.example.services.CollectionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,9 +25,12 @@ import org.springframework.web.server.ResponseStatusException;
 class CollectionServiceTest {
 
     private CollectionDao collectionDao;
+    private NoteDao noteDao;
     private CollectionService collectionService;
     private String COLLECTION_NAME = "Read Later";
+    private String NOTE_TITLE = "Create Database";
     private Collection collection;
+    private Note note;
 
     @BeforeEach
     void setUp() {
@@ -36,8 +41,17 @@ class CollectionServiceTest {
         collection.setIsPublic(true);
         collection.setUsername("user");
 
+        note = new Note();
+        note.setId(1);
+        note.setTitle(NOTE_TITLE);
+        note.setContent("");
+        note.setIsPublic(true);
+        note.setUsername("user");
+        note.setCategoryId(1);
+
         collectionDao = Mockito.mock(CollectionDao.class);
-        collectionService = new CollectionService(collectionDao);
+        noteDao = Mockito.mock(NoteDao.class);
+        collectionService = new CollectionService(collectionDao, noteDao);
     }
 
     @Test
@@ -214,5 +228,220 @@ class CollectionServiceTest {
                 () -> collectionService.delete(100));
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         verify(collectionDao).delete(100);
+    }
+
+    // ======================
+    // CollectionNote
+    // ======================
+    @Test
+    void getAllNotes_shouldReturnAllNotesInCollection() {
+        Note existingNote = new Note();
+        existingNote.setId(2);
+        existingNote.setTitle("React Router");
+        existingNote.setContent("content");
+        existingNote.setUsername("admin");
+        existingNote.setCategoryId(1);
+
+        when(collectionDao.getById(collection.getId()))
+                .thenReturn(Optional.of(collection));
+        when(collectionDao.getAllNotes(collection.getId()))
+                .thenReturn(List.of(note, existingNote));
+
+        List<Note> result = collectionService.getAllNotes(collection.getId());
+        assertEquals(2, result.size());
+        // 1
+        assertEquals(1, result.get(0).getId());
+        assertEquals(NOTE_TITLE, result.get(0).getTitle());
+        assertEquals("", result.get(0).getContent());
+        assertTrue(result.get(0).getIsPublic());
+        assertEquals("user", result.get(0).getUsername());
+        assertEquals(1, result.get(0).getCategoryId());
+        // 2
+        assertEquals(2, result.get(1).getId());
+        assertEquals("React Router", result.get(1).getTitle());
+        assertEquals("content", result.get(1).getContent());
+        assertFalse(result.get(1).getIsPublic());
+        assertEquals("admin", result.get(1).getUsername());
+        assertEquals(1, result.get(1).getCategoryId());
+
+        verify(collectionDao).getById(collection.getId());
+        verify(collectionDao).getAllNotes(collection.getId());
+    }
+
+    @Test
+    void getAllNotes_shouldThrowNotFound_whenCollectionDoesNotExist() {
+        when(collectionDao.getById(100)).thenReturn(Optional.empty());
+
+        ResponseStatusException result = assertThrows(
+                ResponseStatusException.class,
+                () -> collectionService.getAllNotes(100));
+
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+        verify(collectionDao).getById(100);
+        verify(collectionDao, never()).getAllNotes(100);
+    }
+
+    @Test
+    void addNoteToCollection_shouldAddNote_whenInputIsValid() {
+        Note existingNote = new Note();
+        existingNote.setId(2);
+        existingNote.setTitle("React Router");
+        existingNote.setContent("content");
+        existingNote.setUsername("admin");
+        existingNote.setCategoryId(1);
+
+        when(collectionDao.getById(collection.getId()))
+                .thenReturn(Optional.of(collection));
+        when(noteDao.getById(note.getId()))
+                .thenReturn(Optional.of(note));
+        when(collectionDao.existsNoteInCollection(
+                collection.getId(),
+                note.getId())).thenReturn(false);
+        when(collectionDao.addNoteToCollection(
+                collection.getId(),
+                note.getId())).thenReturn(List.of(note, existingNote));
+
+        List<Note> result = collectionService.addNoteToCollection(collection.getId(), note.getId());
+        assertEquals(2, result.size());
+        // 1
+        assertEquals(1, result.get(0).getId());
+        assertEquals(NOTE_TITLE, result.get(0).getTitle());
+        assertEquals("", result.get(0).getContent());
+        assertTrue(result.get(0).getIsPublic());
+        assertEquals("user", result.get(0).getUsername());
+        assertEquals(1, result.get(0).getCategoryId());
+        // 2
+        assertEquals(2, result.get(1).getId());
+        assertEquals("React Router", result.get(1).getTitle());
+        assertEquals("content", result.get(1).getContent());
+        assertFalse(result.get(1).getIsPublic());
+        assertEquals("admin", result.get(1).getUsername());
+        assertEquals(1, result.get(1).getCategoryId());
+
+        verify(collectionDao).getById(collection.getId());
+        verify(noteDao).getById(note.getId());
+        verify(collectionDao)
+                .existsNoteInCollection(collection.getId(), note.getId());
+        verify(collectionDao)
+                .addNoteToCollection(collection.getId(), note.getId());
+    }
+
+    @Test
+    void addNoteToCollection_shouldThrowConflict_whenNoteIsAlreadyInCollection() {
+        when(collectionDao.getById(collection.getId()))
+                .thenReturn(Optional.of(collection));
+        when(noteDao.getById(note.getId()))
+                .thenReturn(Optional.of(note));
+        when(collectionDao.existsNoteInCollection(
+                collection.getId(),
+                note.getId()))
+                .thenReturn(true);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> collectionService.addNoteToCollection(
+                        collection.getId(),
+                        note.getId()));
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        verify(collectionDao, never())
+                .addNoteToCollection(collection.getId(), note.getId());
+    }
+
+    @Test
+    void addNoteToCollection_shouldThrowNotFound_whenCollectionDoesNotExist() {
+        when(collectionDao.getById(100))
+                .thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> collectionService.addNoteToCollection(
+                        100,
+                        note.getId()));
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verify(collectionDao).getById(100);
+        verify(collectionDao, never())
+                .addNoteToCollection(100, note.getId());
+    }
+
+    @Test
+    void addNoteToCollection_shouldThrowNotFound_whenNoteDoesNotExist() {
+        when(collectionDao.getById(collection.getId()))
+                .thenReturn(Optional.of(collection));
+        when(noteDao.getById(100))
+                .thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> collectionService.addNoteToCollection(
+                        collection.getId(), 100));
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verify(collectionDao).getById(collection.getId());
+        verify(noteDao).getById(100);
+        verify(collectionDao, never())
+                .addNoteToCollection(collection.getId(), 100);
+    }
+
+    @Test
+    void removeNoteFromCollection_shouldReturnDeletedRowCount_whenNoteIsInCollection() {
+        when(collectionDao.getById(collection.getId()))
+                .thenReturn(Optional.of(collection));
+        when(collectionDao.removeNoteFromCollection(
+                collection.getId(),
+                note.getId()))
+                .thenReturn(1);
+
+        int result = collectionService.removeNoteFromCollection(
+                collection.getId(),
+                note.getId());
+
+        assertEquals(1, result);
+        verify(collectionDao).getById(collection.getId());
+        verify(collectionDao).removeNoteFromCollection(
+                collection.getId(),
+                note.getId());
+    }
+
+    @Test
+    void removeNoteFromCollection_shouldThrowNotFound_whenCollectionDoesNotExist() {
+        when(collectionDao.getById(100))
+                .thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> collectionService.removeNoteFromCollection(
+                        100,
+                        note.getId()));
+
+        assertEquals(
+                HttpStatus.NOT_FOUND,
+                exception.getStatusCode());
+        verify(collectionDao).getById(100);
+        verify(collectionDao, never())
+                .removeNoteFromCollection(100, note.getId());
+    }
+
+    @Test
+    void removeNoteFromCollection_shouldThrowNotFound_whenNoteIsNotInCollection() {
+        when(collectionDao.getById(collection.getId()))
+                .thenReturn(Optional.of(collection));
+        when(collectionDao.removeNoteFromCollection(
+                collection.getId(),
+                100))
+                .thenReturn(0);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> collectionService.removeNoteFromCollection(
+                        collection.getId(), 100));
+
+        assertEquals(
+                HttpStatus.NOT_FOUND,
+                exception.getStatusCode());
+        verify(collectionDao).getById(collection.getId());
+        verify(collectionDao).removeNoteFromCollection(
+                collection.getId(), 100);
     }
 }
