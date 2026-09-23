@@ -1,14 +1,62 @@
-import React from "react";
+import { useState } from "react";
+import { NavLink, Route, Routes } from "react-router-dom";
+
+import ErrorBoundary from "./services/errorBoundary";
+
+import MyNotesPage from "./pages/MyNotesPage";
+import PublicNotesPage from "./pages/PublicNotesPage";
+import NoteDetailPage from "./pages/NoteDetailPage";
+import NoteFormPage from "./pages/NoteFormPage";
+import CollectionsPage from "./pages/CollectionsPage";
+import CollectionDetailPage from "./pages/CollectionDetailPage";
+import AdminPage from "./pages/AdminPage";
+
+import PageNotFound from "./components/404";
 
 function App() {
+
   return (
-    <div>
+    <>
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-        {/* <p> tag is a placeholder, You'll need to change the tag/component type later*/}
-        <p className="navbar-brand ms-4 nav-link">You've got this!</p>
+        <div className="container-fluid">
+          <div className="d-flex align-items-center">
+            <NavLink className="navbar-brand ms-4 nav-link" to="/">Study Notes</NavLink>
+            <ul className="navbar-nav">
+              <li className="nav-item">
+                <NavLink className="nav-link pe-0" to="/">MyNotesPage</NavLink>
+              </li>
+              <li className="nav-item">
+                <NavLink className="nav-link pe-0" to="/public">PublicNotesPage</NavLink>
+              </li>
+              <li className="nav-item">
+                <NavLink className="nav-link pe-0" to="/collections">CollectionsPage</NavLink>
+              </li>
+            </ul>
+          </div>
+        </div>
       </nav>
       <hr />
-    </div>
+
+      <Routes>
+        <Route path="/" element={<MyNotesPage />} />
+        <Route path="/public" element={<PublicNotesPage />} />
+
+        <Route path="/notes/new" element={<NoteFormPage />} />
+        <Route path="/notes/:id/" element={<NoteDetailPage />} />
+        <Route path="/notes/:id/edit" element={<NoteFormPage />} />
+
+        <Route path="/collections" element={<CollectionsPage />} />
+        <Route path="/collections/:id" element={<CollectionDetailPage />} />
+
+        <Route path="/admin" element={<AdminPage />} />
+        {/* <Route path="/search" element={
+          <ErrorBoundary>
+            <Search result={searchResult} setResult={setSearchResult} />
+          </ErrorBoundary>
+        } /> */}
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+    </>
   );
 }
 
