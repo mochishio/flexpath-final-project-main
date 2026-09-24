@@ -29,6 +29,11 @@ public class CollectionController {
         return collectionService.getById(id);
     }
 
+    @GetMapping("user/{username}")
+    public List<Collection> getByUsername(@PathVariable String username) {
+        return collectionService.getByUsername(username);
+    }
+
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public Collection create(@RequestBody Collection collection) {

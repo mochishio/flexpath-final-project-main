@@ -60,6 +60,16 @@ public class CollectionService {
     }
 
     /**
+     * Gets a collection by username.
+     *
+     * @param username The username of the collection.
+     * @return A list of collections.
+     */
+    public List<Collection> getByUsername(String username) {
+        return collectionDao.getByUsername(username);
+    }
+
+    /**
      * Creates a new collection.
      *
      * @param collection The collection to create.

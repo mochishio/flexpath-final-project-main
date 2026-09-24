@@ -111,6 +111,35 @@ class CollectionServiceTest {
     }
 
     @Test
+    void getByUsername_shouldReturnAllCollections() {
+        Collection existingCollection = new Collection();
+        existingCollection.setId(2);
+        existingCollection.setName("My Best 2026");
+        existingCollection.setDescription("description");
+        existingCollection.setUsername("user");
+
+        when(collectionDao.getByUsername(collection.getUsername())).thenReturn(
+                List.of(collection, existingCollection));
+
+        List<Collection> result = collectionService.getByUsername(collection.getUsername());
+        assertEquals(2, result.size());
+        // 1
+        assertEquals(1, result.get(0).getId());
+        assertEquals(COLLECTION_NAME, result.get(0).getName());
+        assertEquals("", result.get(0).getDescription());
+        assertTrue(result.get(0).getIsPublic());
+        assertEquals("user", result.get(0).getUsername());
+        // 2
+        assertEquals(2, result.get(1).getId());
+        assertEquals("My Best 2026", result.get(1).getName());
+        assertEquals("description", result.get(1).getDescription());
+        assertFalse(result.get(1).getIsPublic());
+        assertEquals("user", result.get(1).getUsername());
+
+        verify(collectionDao).getByUsername(collection.getUsername());
+    }
+
+    @Test
     void create_shouldCreateCollection_whenInputIsValid() {
         when(collectionDao.create(collection)).thenReturn(collection);
 

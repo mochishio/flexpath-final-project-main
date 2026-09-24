@@ -67,6 +67,16 @@ public class CollectionDao implements Dao<Collection> {
         }
     }
 
+    public List<Collection> getByUsername(String username) {
+        String sql = "SELECT * FROM collections WHERE username = ?";
+
+        return jdbcTemplate.query(
+            sql,
+            (rset, rowNum) -> mapCollection(rset),
+            username
+        );
+    }
+
     @Override
     public Collection create(Collection collection) {
         String sql = "INSERT INTO collections (name, description, is_public, username) VALUES (?, ?, ?, ?)";
