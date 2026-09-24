@@ -23,13 +23,13 @@ function App() {
             <NavLink className="navbar-brand ms-4 nav-link" to="/">Study Notes</NavLink>
             <ul className="navbar-nav">
               <li className="nav-item">
-                <NavLink className="nav-link pe-0" to="/">MyNotesPage</NavLink>
+                <NavLink className="nav-link pe-0" to="/">My Notes</NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className="nav-link pe-0" to="/public">PublicNotesPage</NavLink>
+                <NavLink className="nav-link pe-0" to="/public">Public Notes</NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className="nav-link pe-0" to="/collections">CollectionsPage</NavLink>
+                <NavLink className="nav-link pe-0" to="/collections">Collections</NavLink>
               </li>
             </ul>
           </div>
