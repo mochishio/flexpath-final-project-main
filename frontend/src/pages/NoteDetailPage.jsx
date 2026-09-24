@@ -9,6 +9,7 @@ function NoteDetailPage() {
   const [note, setNote] = useState(null);
   const [category, setCategory] = useState(null);
   const [userCollections, setUserCollections] = useState([]);
+  const [existingCollectionIds, setExistingCollectionIds] = useState([]);
   const [selectedCollectionIds, setSelectedCollectionIds] = useState([]);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
   const [error, setError] = useState("");
@@ -105,13 +106,12 @@ function NoteDetailPage() {
           "Failed to get note collections"
         );
       }
-      const noteCollections =
-        await noteCollectionsResponse.json();
-      setSelectedCollectionIds(
-        noteCollections.map(
-          (collection) => collection.id
-        )
+      const noteCollections = await noteCollectionsResponse.json();
+      const ids = noteCollections.map(
+        (collection) => collection.id
       );
+      setExistingCollectionIds(ids);
+      setSelectedCollectionIds(ids);
 
       setShowCollectionModal(true);
 
@@ -135,8 +135,41 @@ function NoteDetailPage() {
     try {
       setError("");
 
-      for (const collectionId of selectedCollectionIds) {
-        // wip
+      const collectionIdsToAdd = selectedCollectionIds.filter(
+        (id) => !existingCollectionIds.includes(id)
+      );
+      const collectionIdsToRemove = existingCollectionIds.filter(
+        (id) => !selectedCollectionIds.includes(id)
+      );
+
+      // Add
+      for (const collectionId of collectionIdsToAdd) {
+        const response = await fetch(
+          `http://localhost:8080/api/collections/${collectionId}/notes/${note.id}`,
+          {
+            method: "POST",
+          }
+        );
+        if (!response.ok) {
+          throw new Error(
+            "Failed to add note to collection"
+          );
+        }
+      }
+
+      // Remove
+      for (const collectionId of collectionIdsToRemove) {
+        const response = await fetch(
+          `http://localhost:8080/api/collections/${collectionId}/notes/${note.id}`,
+          {
+            method: "DELETE",
+          }
+        );
+        if (!response.ok) {
+          throw new Error(
+            "Failed to remove note from collection"
+          );
+        }
       }
 
       setShowCollectionModal(false);
