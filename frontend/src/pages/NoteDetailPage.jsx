@@ -8,6 +8,9 @@ function NoteDetailPage() {
 
   const [note, setNote] = useState(null);
   const [category, setCategory] = useState(null);
+  const [userCollections, setUserCollections] = useState([]);
+  const [selectedCollectionIds, setSelectedCollectionIds] = useState([]);
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -78,6 +81,79 @@ function NoteDetailPage() {
     }
   }
 
+  async function handleAddToCollection() {
+    try {
+      setError("");
+
+      // get user's collections
+      const collectionsResponse = await fetch(
+        `http://localhost:8080/api/collections/user/${currentUsername}`
+      );
+      if (!collectionsResponse.ok) {
+        throw new Error("Failed to get collections");
+      }
+      const collections =
+        await collectionsResponse.json();
+      setUserCollections(collections);
+
+      // get collections where the note already belongs to
+      const noteCollectionsResponse = await fetch(
+        `http://localhost:8080/api/notes/${note.id}/collections`
+      );
+      if (!noteCollectionsResponse.ok) {
+        throw new Error(
+          "Failed to get note collections"
+        );
+      }
+      const noteCollections =
+        await noteCollectionsResponse.json();
+      setSelectedCollectionIds(
+        noteCollections.map(
+          (collection) => collection.id
+        )
+      );
+
+      setShowCollectionModal(true);
+
+    } catch (error) {
+      setError(error.message);
+    }
+  }
+
+  function handleCollectionCheck(collectionId) {
+    setSelectedCollectionIds((currentIds) => {
+      if (currentIds.includes(collectionId)) {
+        return currentIds.filter(
+          (id) => id !== collectionId
+        );
+      }
+      return [...currentIds, collectionId];
+    });
+  }
+
+  async function handleSaveCollections() {
+    try {
+      setError("");
+
+      for (const collectionId of selectedCollectionIds) {
+        // wip
+      }
+
+      setShowCollectionModal(false);
+
+    } catch (error) {
+      setError(error.message);
+    }
+  }
+
+  if (loading) {
+    return (
+      <main className="container mt-4">
+        <p>Loading...</p>
+      </main>
+    );
+  }
+
   if (loading) {
     return (
       <main className="container mt-4">
@@ -144,8 +220,9 @@ function NoteDetailPage() {
             )}
 
             <button
-              className="btn btn-outline-secondary"
+              className="btn btn-outline-dark"
               type="button"
+              onClick={handleAddToCollection}
             >
               + Add to Collection
             </button>
@@ -190,6 +267,98 @@ function NoteDetailPage() {
           </div>
         </div>
       </div>
+
+
+      {/* Modal for adding a note to collections */}
+      {showCollectionModal && (
+        <>
+          <div
+            className="modal show d-block"
+            tabIndex="-1"
+          >
+            <div className="modal-dialog">
+              <div className="modal-content">
+
+                <div className="modal-header">
+                  <h5 className="modal-title">
+                    Add to Collection
+                  </h5>
+
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowCollectionModal(false)}
+                  />
+                </div>
+
+                <div className="modal-body">
+                  {userCollections.map((collection) => (
+                    <div
+                      className="form-check mb-2"
+                      key={collection.id}
+                    >
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id={`collection-${collection.id}`}
+                        checked={selectedCollectionIds.includes(
+                          collection.id
+                        )}
+                        onChange={() =>
+                          handleCollectionCheck(collection.id)
+                        }
+                      />
+
+                      <label
+                        className="form-check-label"
+                        htmlFor={`collection-${collection.id}`}
+                      >
+                        {collection.name}
+
+                        <span className="text-muted ms-2">
+                          {collection.isPublic
+                            ? "Public"
+                            : "Private"}
+                        </span>
+                      </label>
+                    </div>
+                  ))}
+
+                  {userCollections.length === 0 && (
+                    <p className="text-muted">
+                      No collections found.
+                    </p>
+                  )}
+                </div>
+
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() =>
+                      setShowCollectionModal(false)
+                    }
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleSaveCollections}
+                  >
+                    Save
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <div className="modal-backdrop show" />
+        </>
+      )}
+
     </main>
   );
 }
