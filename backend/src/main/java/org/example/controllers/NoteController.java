@@ -1,5 +1,6 @@
 package org.example.controllers;
 
+import org.example.models.Collection;
 import org.example.models.Note;
 import org.example.services.NoteService;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,11 @@ public class NoteController {
     @GetMapping("/{id}")
     public Note getById(@PathVariable int id) {
         return noteService.getById(id);
+    }
+
+    @GetMapping("/{id}/collections")
+    public List<Collection> getCollections(@PathVariable int id) {
+        return noteService.getCollections(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)

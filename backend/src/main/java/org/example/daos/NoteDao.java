@@ -1,5 +1,7 @@
 package org.example.daos;
 
+import org.example.models.Collection;
+import org.example.mappers.CollectionRowMapper;
 import org.example.mappers.NoteRowMapper;
 import org.example.models.Note;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -19,6 +21,7 @@ public class NoteDao implements Dao<Note> {
 
     private final JdbcTemplate jdbcTemplate;
     private final NoteRowMapper noteRowMapper = new NoteRowMapper();
+    private final CollectionRowMapper collectionRowMapper = new CollectionRowMapper();
 
     public NoteDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -48,6 +51,16 @@ public class NoteDao implements Dao<Note> {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    public List<Collection> getCollections(int id) {
+        String sql = """
+                SELECT c.* FROM collections c JOIN collection_notes cn ON c.id = cn.collection_id WHERE cn.note_id = ?
+                """;
+        return jdbcTemplate.query(
+                sql,
+                collectionRowMapper,
+                id);
     }
 
     @Override

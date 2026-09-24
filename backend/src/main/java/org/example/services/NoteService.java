@@ -1,5 +1,6 @@
 package org.example.services;
 
+import org.example.models.Collection;
 import org.example.daos.NoteDao;
 import org.example.models.Note;
 import org.springframework.http.HttpStatus;
@@ -61,6 +62,16 @@ public class NoteService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Note not found"));
+    }
+
+    /**
+     * Gets all collections where the note belongs to.
+     *
+     * @return A list of collections.
+     */
+    public List<Collection> getCollections(int id) {
+        getById(id);
+        return noteDao.getCollections(id);
     }
 
     /**

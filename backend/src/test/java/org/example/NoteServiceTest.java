@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.example.daos.NoteDao;
+import org.example.models.Collection;
 import org.example.models.Note;
 import org.example.services.NoteService;
 import org.junit.jupiter.api.BeforeEach;
@@ -99,6 +100,67 @@ class NoteServiceTest {
                 () -> noteService.getById(100));
         assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
         verify(noteDao).getById(100);
+    }
+
+    @Test
+    void getCollections_shouldReturnAllCollections() {
+        Collection collection = new Collection();
+        collection.setId(1);
+        collection.setName("Read Later");
+        collection.setDescription("");
+        collection.setIsPublic(true);
+        collection.setUsername("user");
+
+        Collection existingCollection = new Collection();
+        existingCollection.setId(2);
+        existingCollection.setName("My Best 2026");
+        existingCollection.setDescription("description");
+        existingCollection.setUsername("user");
+
+        when(noteDao.getById(note.getId()))
+                .thenReturn(Optional.of(note));
+        when(noteDao.getCollections(note.getId()))
+                .thenReturn(List.of(collection, existingCollection));
+
+        List<Collection> result = noteDao.getCollections(note.getId());
+        assertEquals(2, result.size());
+        // 1
+        assertEquals(1, result.get(0).getId());
+        assertEquals("Read Later", result.get(0).getName());
+        assertEquals("", result.get(0).getDescription());
+        assertTrue(result.get(0).getIsPublic());
+        assertEquals("user", result.get(0).getUsername());
+        // 2
+        assertEquals(2, result.get(1).getId());
+        assertEquals("My Best 2026", result.get(1).getName());
+        assertEquals("description", result.get(1).getDescription());
+        assertFalse(result.get(1).getIsPublic());
+        assertEquals("user", result.get(1).getUsername());
+
+        verify(noteDao).getCollections(note.getId());
+    }
+
+    @Test
+    void getCollections_shouldReturnEmptyList_whenNoteHasNoCollections() {
+        when(noteDao.getById(note.getId()))
+                .thenReturn(Optional.of(note));
+        when(noteDao.getCollections(note.getId()))
+                .thenReturn(List.of());
+
+        List<Collection> result = noteService.getCollections(note.getId());
+        assertTrue(result.isEmpty());
+        verify(noteDao).getById(note.getId());
+        verify(noteDao).getCollections(note.getId());
+    }
+
+    @Test
+    void getCollections_shouldThrowNotFound_whenNoteDoesNotExist() {
+        ResponseStatusException result = assertThrows(
+                ResponseStatusException.class,
+                () -> noteService.getCollections(100));
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+        verify(noteDao).getById(100);
+        verify(noteDao, never()).getCollections(100);
     }
 
     @Test

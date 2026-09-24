@@ -1,5 +1,6 @@
 package org.example.daos;
 
+import org.example.mappers.CollectionRowMapper;
 import org.example.mappers.NoteRowMapper;
 import org.example.models.Collection;
 import org.example.models.Note;
@@ -11,8 +12,6 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
@@ -22,23 +21,10 @@ public class CollectionDao implements Dao<Collection> {
 
     private final JdbcTemplate jdbcTemplate;
     private final NoteRowMapper noteRowMapper = new NoteRowMapper();
+    private final CollectionRowMapper collectionRowMapper = new CollectionRowMapper();
 
     public CollectionDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
-
-    private Collection mapCollection(ResultSet rset) throws SQLException {
-        Collection collection = new Collection();
-        collection.setId(rset.getInt("ID"));
-        collection.setCreatedAt(
-                rset.getTimestamp("CREATED_AT").toLocalDateTime());
-        collection.setUpdatedAt(
-                rset.getTimestamp("UPDATED_AT").toLocalDateTime());
-        collection.setName(rset.getString("NAME"));
-        collection.setDescription(rset.getString("DESCRIPTION"));
-        collection.setIsPublic(rset.getBoolean("IS_PUBLIC"));
-        collection.setUsername(rset.getString("USERNAME"));
-        return collection;
     }
 
     @Override
@@ -47,7 +33,7 @@ public class CollectionDao implements Dao<Collection> {
 
         return jdbcTemplate.query(
                 sql,
-                (rset, rowNum) -> mapCollection(rset));
+                collectionRowMapper);
     }
 
     @Override
@@ -57,7 +43,7 @@ public class CollectionDao implements Dao<Collection> {
         try {
             Collection collection = jdbcTemplate.queryForObject(
                     sql,
-                    (rset, rowNum) -> mapCollection(rset),
+                    collectionRowMapper,
                     id);
 
             return Optional.ofNullable(collection);
@@ -72,7 +58,7 @@ public class CollectionDao implements Dao<Collection> {
 
         return jdbcTemplate.query(
             sql,
-            (rset, rowNum) -> mapCollection(rset),
+            collectionRowMapper,
             username
         );
     }
