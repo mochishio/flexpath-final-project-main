@@ -20,7 +20,7 @@ public class NoteRowMapper implements RowMapper<Note> {
         note.setContent(rset.getString("CONTENT"));
         note.setIsPublic(rset.getBoolean("IS_PUBLIC"));
         note.setUsername(rset.getString("USERNAME"));
-        note.setCategoryId(rset.getInt("CATEGORY_ID"));
+        note.setCategoryId(rset.getObject("CATEGORY_ID", Integer.class));
         return note;
     }
 }

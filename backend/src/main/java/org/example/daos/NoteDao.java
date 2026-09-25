@@ -78,7 +78,7 @@ public class NoteDao implements Dao<Note> {
             ps.setString(2, note.getContent());
             ps.setBoolean(3, note.getIsPublic());
             ps.setString(4, note.getUsername());
-            ps.setInt(5, note.getCategoryId());
+            ps.setObject(5, note.getCategoryId());
 
             return ps;
         }, keyHolder);
