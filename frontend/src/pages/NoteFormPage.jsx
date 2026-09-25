@@ -91,8 +91,6 @@ function NoteFormPage() {
         ? "PUT"
         : "POST";
 
-        console.log(noteData);
-
       const response = await fetch(url, {
         method: method,
         headers: {
