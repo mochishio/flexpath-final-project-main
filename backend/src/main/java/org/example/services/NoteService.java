@@ -18,7 +18,12 @@ public class NoteService {
         if (note.getTitle() == null || note.getTitle().isBlank()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Name is required");
+                    "Title is required");
+        }
+        if (note.getTitle().length() > 255) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Title must be 255 characters or less");
         }
     }
 

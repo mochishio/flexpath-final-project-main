@@ -185,8 +185,12 @@ function NoteFormPage() {
                 onChange={(event) =>
                   setTitle(event.target.value)
                 }
+                maxLength={255}
                 required
               />
+              <div className="form-text text-end">
+                {title.length} / 255
+              </div>
             </div>
 
             {/* Category */}
