@@ -12,7 +12,7 @@ function MyNotesPage() {
   const [keyword, setKeyword] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [visibilityFilter, setVisibilityFilter] = useState("");
-  const [sortBy, setSortBy] = useState("updatedAt");
+  const [sortBy, setSortBy] = useState("updated");
   const [sortDirection, setSortDirection] = useState("desc");
 
   // Load Notes
@@ -98,12 +98,12 @@ function MyNotesPage() {
         comparison = a.title.localeCompare(b.title);
       }
 
-      if (sortBy === "createdAt") {
+      if (sortBy === "created") {
         comparison =
           new Date(a.createdAt) - new Date(b.createdAt);
       }
 
-      if (sortBy === "updatedAt") {
+      if (sortBy === "updated") {
         comparison =
           new Date(a.updatedAt) - new Date(b.updatedAt);
       }
@@ -113,6 +113,15 @@ function MyNotesPage() {
         : -comparison;
     });
 
+    setDisplayedNotes(result);
+  }
+
+  function handleSortDirection() {
+    const newDirection =
+      sortDirection === "asc" ? "desc" : "asc";
+    setSortDirection(newDirection);
+
+    const result = [...displayedNotes].reverse();
     setDisplayedNotes(result);
   }
 
@@ -226,31 +235,9 @@ function MyNotesPage() {
               setSortBy(event.target.value)
             }
           >
-            <option value="updatedAt">Updated</option>
-            <option value="createdAt">Created</option>
+            <option value="updated">Updated</option>
+            <option value="created">Created</option>
             <option value="title">Title</option>
-          </select>
-        </div>
-
-        {/* Sort Direction */}
-        <div className="col-md">
-          <label
-            htmlFor="sortDirection"
-            className="form-label"
-          >
-            Direction
-          </label>
-
-          <select
-            id="sortDirection"
-            className="form-select"
-            value={sortDirection}
-            onChange={(event) =>
-              setSortDirection(event.target.value)
-            }
-          >
-            <option value="asc">ASC</option>
-            <option value="desc">DESC</option>
           </select>
         </div>
       </div>
@@ -288,10 +275,24 @@ function MyNotesPage() {
         </div>
       )}
 
-      {/* Result count */}
-      <p className="text-muted">
-        {displayedNotes.length} note(s)
-      </p>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <span className="text-muted">
+          {displayedNotes.length} note(s)
+        </span>
+
+        <button
+          type="button"
+          className="btn btn-sm btn-outline-secondary"
+          onClick={handleSortDirection}
+          title={
+            sortDirection === "desc"
+              ? "Descending"
+              : "Ascending"
+          }
+        >
+          {sortDirection === "desc" ? "↓" : "↑"}
+        </button>
+      </div>
 
       {/* Notes */}
       <div className="d-flex flex-column gap-3">
