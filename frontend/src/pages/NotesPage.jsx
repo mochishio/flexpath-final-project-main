@@ -25,6 +25,8 @@ function NotesPage() {
 
   // Load Notes
   useEffect(() => {
+    handleClear();
+
     async function loadNotes() {
       try {
         setError("");
