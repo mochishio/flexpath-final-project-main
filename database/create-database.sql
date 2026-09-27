@@ -74,21 +74,32 @@ insert into categories (name) values ('Maven');
 insert into categories (name) values ('React');
 insert into categories (name) values ('Spring Boot');
 
--- regular user
+-- users
 insert into users (username, password) values ('user', '$2a$10$tBTfzHzjmQVKza3VSa5lsOX6/iL93xPVLlLXYg2FhT6a.jb1o6VDq');
 insert into roles (username, role) values ('user', 'USER');
--- public/private notes
+insert into users (username, password) values ('user2', '$2a$10$tBTfzHzjmQVKza3VSa5lsOX6/iL93xPVLlLXYg2FhT6a.jb1o6VDq');
+insert into roles (username, role) values ('user2', 'USER');
+-- public/private notes by regular user
 insert into notes
     (title, content, is_public, username, category_id)
 values ('Create Database', '', true, 'user', (select id from categories where name = 'MySQL'));
 insert into notes
     (title, content, is_public, username, category_id)
 values ('React Router', '', false, 'user', (select id from categories where name = 'React'));
+-- public/private notes by another user
+insert into notes
+    (title, content, is_public, username, category_id)
+values ('Bootstrap', '', true, 'user2', (select id from categories where name = 'CSS'));
+insert into notes
+    (title, content, is_public, username, category_id)
+values ('div, span, a', '', false, 'user2', (select id from categories where name = 'HTML'));
 -- public/private collections
 insert into collections (name, is_public, username) values ('Read Later', false, 'user');
 insert into collections (name, is_public, username) values ('My Best 2026', true, 'user');
 -- many-to-many
 insert into collection_notes (collection_id, note_id) values (1, 1);
 insert into collection_notes (collection_id, note_id) values (1, 2);
+insert into collection_notes (collection_id, note_id) values (1, 3);
 insert into collection_notes (collection_id, note_id) values (2, 1);
 insert into collection_notes (collection_id, note_id) values (2, 2);
+insert into collection_notes (collection_id, note_id) values (2, 3);

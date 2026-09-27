@@ -1,11 +1,15 @@
 import { formatDateTime } from "../utils/date";
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 // wip
 const currentUsername = "user";
 
 function MyNotesPage() {
+  const location = useLocation();
+  const isPublicMode = location.pathname === "/public";
+
   const [notes, setNotes] = useState([]);
   const [displayedNotes, setDisplayedNotes] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -14,24 +18,30 @@ function MyNotesPage() {
   // Search / Filter / Sort
   const [keyword, setKeyword] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [usernameFilter, setUsernameFilter] = useState("");
   const [visibilityFilter, setVisibilityFilter] = useState("");
   const [sortBy, setSortBy] = useState("updated");
   const [sortDirection, setSortDirection] = useState("desc");
-  const [author, setAuthor] = useState("");
 
   // Load Notes
   useEffect(() => {
     async function loadNotes() {
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/notes/user/${currentUsername}`
-        );
+        setError("");
 
+        const getNotesURL = isPublicMode
+          ? "http://localhost:8080/api/notes"
+          : `http://localhost:8080/api/notes/user/${currentUsername}`;
+
+        const response = await fetch(getNotesURL);
         if (!response.ok) {
           throw new Error("Failed to load notes");
         }
 
-        const data = await response.json();
+        let data = await response.json();
+        if (isPublicMode) {
+          data = data.filter((note) => (note.isPublic === true));
+        }
         setNotes(data);
         setDisplayedNotes(data);
       } catch (error) {
@@ -40,7 +50,7 @@ function MyNotesPage() {
     }
 
     loadNotes();
-  }, []);
+  }, [isPublicMode]);
 
   // Load Categories
   useEffect(() => {
@@ -85,13 +95,26 @@ function MyNotesPage() {
       );
     }
 
-    // Visibility
-    if (visibilityFilter !== "") {
-      const isPublic = visibilityFilter === "public";
+    if (isPublicMode) {
+      // Username
+      if (usernameFilter.trim() !== "") {
+        const searchUsername = usernameFilter.toLowerCase();
+        result = result.filter((note) =>
+          note.username
+            .toLowerCase()
+            .includes(searchUsername)
+        );
+      }
 
-      result = result.filter(
-        (note) => note.isPublic === isPublic
-      );
+    } else {
+      // Visibility
+      if (visibilityFilter !== "") {
+        const isPublic = visibilityFilter === "public";
+
+        result = result.filter(
+          (note) => note.isPublic === isPublic
+        );
+      }
     }
 
     // Sort
@@ -133,8 +156,9 @@ function MyNotesPage() {
   function handleClear() {
     setKeyword("");
     setCategoryFilter("");
+    setUsernameFilter("");
     setVisibilityFilter("");
-    setSortBy("updatedAt");
+    setSortBy("updated");
     setSortDirection("desc");
 
     const result = [...notes].sort(
@@ -199,28 +223,55 @@ function MyNotesPage() {
           </select>
         </div>
 
-        {/* Visibility */}
-        <div className="col-md">
-          <label
-            htmlFor="visibility"
-            className="form-label"
-          >
-            Visibility
-          </label>
+        {isPublicMode ? (
+          <>
+            {/* Username */}
+            <div className="col-md">
+              <label
+                htmlFor="username"
+                className="form-label"
+              >
+                Username
+              </label>
 
-          <select
-            id="visibility"
-            className="form-select"
-            value={visibilityFilter}
-            onChange={(event) =>
-              setVisibilityFilter(event.target.value)
-            }
-          >
-            <option value="">All</option>
-            <option value="public">Public</option>
-            <option value="private">Private</option>
-          </select>
-        </div>
+              <input
+                id="username"
+                className="form-control"
+                type="text"
+                placeholder="Username..."
+                value={usernameFilter}
+                onChange={(event) =>
+                  setUsernameFilter(event.target.value)
+                }
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Visibility */}
+            <div className="col-md">
+              <label
+                htmlFor="visibility"
+                className="form-label"
+              >
+                Visibility
+              </label>
+
+              <select
+                id="visibility"
+                className="form-select"
+                value={visibilityFilter}
+                onChange={(event) =>
+                  setVisibilityFilter(event.target.value)
+                }
+              >
+                <option value="">All</option>
+                <option value="public">Public</option>
+                <option value="private">Private</option>
+              </select>
+            </div>
+          </>
+        )}
 
         {/* Sort */}
         <div className="col-md">
@@ -314,6 +365,10 @@ function MyNotesPage() {
                   >
                     {note.title}
                   </h5>
+
+                  <div>
+                    <span>by {note.username}</span>
+                  </div>
                 </div>
 
                 <div>

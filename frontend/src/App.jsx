@@ -39,7 +39,7 @@ function App() {
 
       <Routes>
         <Route path="/" element={<MyNotesPage />} />
-        <Route path="/public" element={<PublicNotesPage />} />
+        <Route path="/public" element={<MyNotesPage />} />
 
         <Route path="/notes/new" element={<NoteFormPage />} />
         <Route path="/notes/:id/" element={<NoteDetailPage />} />
