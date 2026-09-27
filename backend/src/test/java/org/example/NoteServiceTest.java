@@ -103,6 +103,38 @@ class NoteServiceTest {
     }
 
     @Test
+    void getByUsername_shouldReturnAllNotes() {
+        Note existingNote = new Note();
+        existingNote.setId(2);
+        existingNote.setTitle("React Router");
+        existingNote.setContent("content");
+        existingNote.setUsername("user");
+        existingNote.setCategoryId(2);
+
+        when(noteDao.getByUsername(note.getUsername())).thenReturn(
+                List.of(note, existingNote));
+
+        List<Note> result = noteService.getByUsername(note.getUsername());
+        assertEquals(2, result.size());
+        // 1
+        assertEquals(1, result.get(0).getId());
+        assertEquals(NOTE_TITLE, result.get(0).getTitle());
+        assertEquals("", result.get(0).getContent());
+        assertTrue(result.get(0).getIsPublic());
+        assertEquals("user", result.get(0).getUsername());
+        assertEquals(1, result.get(0).getCategoryId());
+        // 2
+        assertEquals(2, result.get(1).getId());
+        assertEquals("React Router", result.get(1).getTitle());
+        assertEquals("content", result.get(1).getContent());
+        assertFalse(result.get(1).getIsPublic());
+        assertEquals("user", result.get(1).getUsername());
+        assertEquals(2, result.get(1).getCategoryId());
+
+        verify(noteDao).getByUsername(note.getUsername());
+    }
+
+    @Test
     void getCollections_shouldReturnAllCollections() {
         Collection collection = new Collection();
         collection.setId(1);

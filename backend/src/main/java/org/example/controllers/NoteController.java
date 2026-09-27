@@ -29,6 +29,11 @@ public class NoteController {
         return noteService.getById(id);
     }
 
+    @GetMapping("/user/{username}")
+    public List<Note> getByUsername(@PathVariable String username) {
+        return noteService.getByUsername(username);
+    }
+
     @GetMapping("/{id}/collections")
     public List<Collection> getCollections(@PathVariable int id) {
         return noteService.getCollections(id);

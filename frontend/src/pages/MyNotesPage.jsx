@@ -2,6 +2,9 @@ import { formatDateTime } from "../utils/date";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+// wip
+const currentUsername = "user";
+
 function MyNotesPage() {
   const [notes, setNotes] = useState([]);
   const [displayedNotes, setDisplayedNotes] = useState([]);
@@ -14,13 +17,14 @@ function MyNotesPage() {
   const [visibilityFilter, setVisibilityFilter] = useState("");
   const [sortBy, setSortBy] = useState("updated");
   const [sortDirection, setSortDirection] = useState("desc");
+  const [author, setAuthor] = useState("");
 
   // Load Notes
   useEffect(() => {
     async function loadNotes() {
       try {
         const response = await fetch(
-          "http://localhost:8080/api/notes"
+          `http://localhost:8080/api/notes/user/${currentUsername}`
         );
 
         if (!response.ok) {

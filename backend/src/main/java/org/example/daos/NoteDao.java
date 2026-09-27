@@ -53,6 +53,15 @@ public class NoteDao implements Dao<Note> {
         }
     }
 
+    public List<Note> getByUsername(String username) {
+        String sql = "SELECT * FROM notes WHERE username = ?";
+        return jdbcTemplate.query(
+                sql,
+                noteRowMapper,
+                username
+            );
+    }
+
     public List<Collection> getCollections(int id) {
         String sql = """
                 SELECT c.* FROM collections c JOIN collection_notes cn ON c.id = cn.collection_id WHERE cn.note_id = ?

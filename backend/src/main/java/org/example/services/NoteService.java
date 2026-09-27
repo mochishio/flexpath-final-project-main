@@ -70,6 +70,15 @@ public class NoteService {
     }
 
     /**
+     * Gets notes by the username.
+     *
+     * @return A list of notes.
+     */
+    public List<Note> getByUsername(String username) {
+        return noteDao.getByUsername(username);
+    }
+
+    /**
      * Gets all collections where the note belongs to.
      *
      * @return A list of collections.
