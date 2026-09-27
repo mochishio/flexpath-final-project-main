@@ -3,7 +3,7 @@ import { NavLink, Route, Routes } from "react-router-dom";
 
 import ErrorBoundary from "./services/errorBoundary";
 
-import MyNotesPage from "./pages/MyNotesPage";
+import NotesPage from "./pages/NotesPage";
 import PublicNotesPage from "./pages/PublicNotesPage";
 import NoteDetailPage from "./pages/NoteDetailPage";
 import NoteFormPage from "./pages/NoteFormPage";
@@ -38,8 +38,8 @@ function App() {
       <hr />
 
       <Routes>
-        <Route path="/" element={<MyNotesPage />} />
-        <Route path="/public" element={<MyNotesPage />} />
+        <Route path="/" element={<NotesPage />} />
+        <Route path="/public" element={<NotesPage />} />
 
         <Route path="/notes/new" element={<NoteFormPage />} />
         <Route path="/notes/:id/" element={<NoteDetailPage />} />

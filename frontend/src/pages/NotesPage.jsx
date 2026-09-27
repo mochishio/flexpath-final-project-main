@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 // wip
 const currentUsername = "user";
 
-function MyNotesPage() {
+function NotesPage() {
   const location = useLocation();
   const isPublicMode = location.pathname === "/public";
 
@@ -416,4 +416,4 @@ function MyNotesPage() {
   );
 }
 
-export default MyNotesPage;
+export default NotesPage;
