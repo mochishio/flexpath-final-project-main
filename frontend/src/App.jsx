@@ -4,7 +4,6 @@ import { NavLink, Route, Routes } from "react-router-dom";
 import ErrorBoundary from "./services/errorBoundary";
 
 import NotesPage from "./pages/NotesPage";
-import PublicNotesPage from "./pages/PublicNotesPage";
 import NoteDetailPage from "./pages/NoteDetailPage";
 import NoteFormPage from "./pages/NoteFormPage";
 import CollectionsPage from "./pages/CollectionsPage";
