@@ -182,6 +182,17 @@ function CollectionsPage() {
     setNotesByCollection(updatedNotesByCollection);
   }
 
+  function handleCollectionUpdated(updatedCollection) {
+      const updatedCollections = myCollections.map((collection) => {
+        if (collection.id === updatedCollection.id) {
+          return updatedCollection;
+        }
+        return collection;
+      });
+      setMyCollections(updatedCollections);
+      setDisplayedMyCollections(updatedCollections);
+  }
+
   return (
     <main className="container mt-4">
       <div className="row g-3">
@@ -316,6 +327,7 @@ function CollectionsPage() {
                   collection={collection}
                   notes={notesByCollection[collection.id] ?? []}
                   onNoteRemoved={handleNoteRemoved}
+                  onCollectionUpdated={handleCollectionUpdated}
                 />
               )
             )}
@@ -347,6 +359,7 @@ function CollectionsPage() {
                   collection={collection}
                   notes={notesByCollection[collection.id] ?? []}
                   onNoteRemoved={handleNoteRemoved}
+                  onCollectionUpdated={handleCollectionUpdated}
                 />
               )
             )}

@@ -7,7 +7,6 @@ import NotesPage from "./pages/NotesPage";
 import NoteDetailPage from "./pages/NoteDetailPage";
 import NoteFormPage from "./pages/NoteFormPage";
 import CollectionsPage from "./pages/CollectionsPage";
-import CollectionDetailPage from "./pages/CollectionDetailPage";
 import AdminPage from "./pages/AdminPage";
 
 import PageNotFound from "./components/404";
@@ -45,7 +44,6 @@ function App() {
         <Route path="/notes/:id/edit" element={<NoteFormPage />} />
 
         <Route path="/collections" element={<CollectionsPage />} />
-        <Route path="/collections/:id" element={<CollectionDetailPage />} />
 
         <Route path="/admin" element={<AdminPage />} />
         {/* <Route path="/search" element={
