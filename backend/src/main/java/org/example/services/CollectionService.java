@@ -70,6 +70,15 @@ public class CollectionService {
     }
 
     /**
+     * Gets public collections except mine.
+     *
+     * @return A list of public collections.
+     */
+    public List<Collection> getPublicCollections() {
+        return collectionDao.getPublicCollections();
+    }
+
+    /**
      * Creates a new collection.
      *
      * @param collection The collection to create.

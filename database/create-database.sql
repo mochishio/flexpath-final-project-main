@@ -96,6 +96,8 @@ values ('div, span, a', '', false, 'user2', (select id from categories where nam
 -- public/private collections
 insert into collections (name, is_public, username) values ('Read Later', false, 'user');
 insert into collections (name, is_public, username) values ('My Best 2026', true, 'user');
+insert into collections (name, is_public, username) values ('My private notes', false, 'user2');
+insert into collections (name, is_public, username) values ('Useful notes for the final project', true, 'user2');
 -- many-to-many
 insert into collection_notes (collection_id, note_id) values (1, 1);
 insert into collection_notes (collection_id, note_id) values (1, 2);
@@ -103,3 +105,8 @@ insert into collection_notes (collection_id, note_id) values (1, 3);
 insert into collection_notes (collection_id, note_id) values (2, 1);
 insert into collection_notes (collection_id, note_id) values (2, 2);
 insert into collection_notes (collection_id, note_id) values (2, 3);
+insert into collection_notes (collection_id, note_id) values (3, 1);
+insert into collection_notes (collection_id, note_id) values (3, 3);
+insert into collection_notes (collection_id, note_id) values (3, 4);
+insert into collection_notes (collection_id, note_id) values (4, 3);
+insert into collection_notes (collection_id, note_id) values (4, 4);

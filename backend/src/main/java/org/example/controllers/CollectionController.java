@@ -34,6 +34,11 @@ public class CollectionController {
         return collectionService.getByUsername(username);
     }
 
+    @GetMapping("/public")
+    public List<Collection> getPublicCollections() {
+        return collectionService.getPublicCollections();
+    }
+
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public Collection create(@RequestBody Collection collection) {

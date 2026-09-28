@@ -57,10 +57,16 @@ public class CollectionDao implements Dao<Collection> {
         String sql = "SELECT * FROM collections WHERE username = ?";
 
         return jdbcTemplate.query(
-            sql,
-            collectionRowMapper,
-            username
-        );
+                sql,
+                collectionRowMapper,
+                username);
+    }
+
+    public List<Collection> getPublicCollections() {
+        String sql = "SELECT * FROM collections WHERE is_public = true";
+        return jdbcTemplate.query(
+                sql,
+                collectionRowMapper);
     }
 
     @Override
