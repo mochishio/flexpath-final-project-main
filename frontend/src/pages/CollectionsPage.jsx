@@ -171,6 +171,17 @@ function CollectionsPage() {
     setDisplayedPublicCollections(publicResult);
   }
 
+  function handleNoteRemoved(collectionId, noteId) {
+    const updatedNotesByCollection = {...notesByCollection};
+    const targetCollectionNotes = updatedNotesByCollection[collectionId];
+    const updatedTargetCollectionNotes =
+      targetCollectionNotes.filter(
+        (note) => note.id !== noteId
+      );
+    updatedNotesByCollection[collectionId] = updatedTargetCollectionNotes;
+    setNotesByCollection(updatedNotesByCollection);
+  }
+
   return (
     <main className="container mt-4">
       <div className="row g-3">
@@ -304,6 +315,7 @@ function CollectionsPage() {
                   key={collection.id}
                   collection={collection}
                   notes={notesByCollection[collection.id] ?? []}
+                  onNoteRemoved={handleNoteRemoved}
                 />
               )
             )}
@@ -334,6 +346,7 @@ function CollectionsPage() {
                   key={collection.id}
                   collection={collection}
                   notes={notesByCollection[collection.id] ?? []}
+                  onNoteRemoved={handleNoteRemoved}
                 />
               )
             )}
