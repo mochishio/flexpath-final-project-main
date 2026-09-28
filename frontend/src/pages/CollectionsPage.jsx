@@ -10,8 +10,6 @@ function CollectionsPage() {
 
   const [displayedMyCollections, setDisplayedMyCollections] = useState([]);
   const [displayedPublicCollections, setDisplayedPublicCollections] = useState([]);
-
-  const [myCollectionsNotes, setMyCollectionsNotes] = useState({});
   const [notesByCollection, setNotesByCollection] = useState({});
 
   // Search / Filter / Sort
