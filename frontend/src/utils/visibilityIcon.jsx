@@ -1,4 +1,6 @@
-export function addVisibilityIcon(visibility, text) {
+export function addVisibilityIcon(visibility, text, reverse=false) {
   const icon = visibility ? "🌐" : "🔒"
-  return `${icon} ${text}`
+  return reverse
+    ? `${text} ${icon}`
+    : `${icon} ${text}`;
 }

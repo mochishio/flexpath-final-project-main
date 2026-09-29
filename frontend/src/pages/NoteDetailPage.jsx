@@ -400,13 +400,7 @@ function NoteDetailPage() {
                         className="form-check-label"
                         htmlFor={`collection-${collection.id}`}
                       >
-                        {collection.name}
-
-                        <span className="text-muted ms-2">
-                          {collection.isPublic
-                            ? "Public"
-                            : "Private"}
-                        </span>
+                        {addVisibilityIcon(collection.isPublic, collection.name, true)}
                       </label>
                     </div>
                   ))}
