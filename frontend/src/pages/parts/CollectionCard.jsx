@@ -1,3 +1,4 @@
+import { addVisibilityIcon } from "../../utils/visibilityIcon";
 import { Link } from "react-router-dom";
 import { formatDateTime } from "../../utils/date";
 import { useState } from "react";
@@ -89,10 +90,7 @@ export function CollectionCard({
         <div className="d-flex justify-content-between">
           <div>
             <h5>
-              {collection.name}{" "}
-              {collection.isPublic
-                ? "🌐"
-                : "🔒"}
+              {addVisibilityIcon(collection.isPublic, collection.name)}
             </h5>
 
             <div className="mb-2">
@@ -134,7 +132,7 @@ export function CollectionCard({
                   className="text-truncate"
                   title={note.title}
                 >
-                  {note.title}
+                  {addVisibilityIcon(note.isPublic, note.title)}
                 </div>
               </div>
 

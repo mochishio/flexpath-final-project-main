@@ -1,3 +1,4 @@
+import { addVisibilityIcon } from "../utils/visibilityIcon";
 import { formatDateTime } from "../utils/date";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -227,7 +228,7 @@ function NoteDetailPage() {
 
           {/* Title */}
           <h2 className="mb-4">
-            {note.title}
+            {addVisibilityIcon(note.isPublic, note.title)}
           </h2>
 
           {/* Buttons */}

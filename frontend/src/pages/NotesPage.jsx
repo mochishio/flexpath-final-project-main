@@ -1,3 +1,4 @@
+import { addVisibilityIcon } from "../utils/visibilityIcon";
 import { formatDateTime } from "../utils/date";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -365,21 +366,12 @@ function NotesPage() {
                     className="text-truncate mb-0"
                     title={note.title}
                   >
-                    {note.title}
+                    {addVisibilityIcon(note.isPublic, note.title)}
                   </h5>
 
                   <div>
                     <span>by {note.username}</span>
                   </div>
-                </div>
-
-                <div>
-                  <div>Visibility</div>
-                  <span className="text-muted">
-                    {note.isPublic
-                      ? "Public"
-                      : "Private"}
-                  </span>
                 </div>
 
                 <div>
