@@ -1,4 +1,5 @@
 import { addVisibilityIcon } from "../../utils/visibilityIcon";
+import { CollectionForm } from "../parts/CollectionForm";
 import { Link } from "react-router-dom";
 import { formatDateTime } from "../../utils/date";
 import { useState } from "react";
@@ -11,12 +12,7 @@ export function CollectionCard({
 }) {
   const isOwner = collection.username === currentUsername;
 
-  // update collection
-  const [name, setName] = useState("");
-  const [isPublic, setIsPublic] = useState(false);
-  const [description, setDescription] = useState("");
   const [showCollectionModal, setShowCollectionModal] = useState(false);
-
   const [error, setError] = useState("");
 
   async function handleRemove(noteId) {
@@ -47,22 +43,14 @@ export function CollectionCard({
   }
 
   function handleOpenCollectionModal() {
-    setName(collection.name);
-    setIsPublic(collection.isPublic);
-    setDescription(collection.description ?? "");
-
+    setError("");
     setShowCollectionModal(true);
   }
 
-  async function handleSaveCollection() {
+  async function handleSaveCollection(collectionData) {
     try {
       setError("");
 
-      const collectionData = {
-        name: name,
-        description: description,
-        isPublic: isPublic,
-      };
       const response = await fetch(
         `http://localhost:8080/api/collections/${collection.id}`,
         {
@@ -173,158 +161,15 @@ export function CollectionCard({
 
 
       {/* Modal to edit a collection */}
-      {showCollectionModal && (
-        <>
-          <div
-            className="modal show d-block"
-            tabIndex="-1"
-          >
-            <div className="modal-dialog">
-              <div className="modal-content">
-
-                <div className="modal-header">
-                  <h5 className="modal-title">
-                    Edit a collection
-                  </h5>
-
-                  <button
-                    type="button"
-                    className="btn-close"
-                    onClick={() => setShowCollectionModal(false)}
-                  />
-                </div>
-
-                {/* Error */}
-                {error && (
-                  <div className="alert alert-danger">
-                    {error}
-                  </div>
-                )}
-
-                <div className="modal-body">
-                  <div
-                    className="form-check mb-2 px-4"
-                    key={collection.id}
-                  >
-                    {/* Name */}
-                    <div className="mb-3">
-                      <label
-                        htmlFor="name"
-                        className="form-label"
-                      >
-                        Name
-                      </label>
-
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="name"
-                        value={name}
-                        onChange={(event) =>
-                          setName(event.target.value)
-                        }
-                        maxLength={255}
-                        required
-                      />
-                      <div className="form-text text-end">
-                        {name.length} / 255
-                      </div>
-                    </div>
-
-                    {/* Visibility */}
-                    <div className="mb-3">
-                      <label className="form-label d-block">
-                        Visibility
-                      </label>
-
-                      <div className="form-check form-check-inline">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          name="visibility"
-                          id="private"
-                          checked={!isPublic}
-                          onChange={() => setIsPublic(false)}
-                        />
-
-                        <label
-                          className="form-check-label"
-                          htmlFor="private"
-                        >
-                          Private
-                        </label>
-                      </div>
-
-                      <div className="form-check form-check-inline">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          name="visibility"
-                          id="public"
-                          checked={isPublic}
-                          onChange={() => setIsPublic(true)}
-                        />
-
-                        <label
-                          className="form-check-label"
-                          htmlFor="public"
-                        >
-                          Public
-                        </label>
-                      </div>
-                    </div>
-
-                    {/* Description */}
-                    <div className="mb-3">
-                      <label
-                        htmlFor="description"
-                        className="form-label"
-                      >
-                        Description
-                      </label>
-
-                      <textarea
-                        className="form-control"
-                        id="description"
-                        rows="5"
-                        value={description}
-                        onChange={(event) =>
-                          setDescription(event.target.value)
-                        }
-                        required
-                      />
-                    </div>
-
-                  </div>
-                </div>
-
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() =>
-                      setShowCollectionModal(false)
-                    }
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={handleSaveCollection}
-                  >
-                    Save
-                  </button>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-          <div className="modal-backdrop show" />
-        </>
-      )}
+      <CollectionForm
+        collection={collection}
+        show={showCollectionModal}
+        onClose={() =>
+          setShowCollectionModal(false)
+        }
+        onSave={handleSaveCollection}
+        error={error}
+      />
 
     </div>
   );
