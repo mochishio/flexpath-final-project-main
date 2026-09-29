@@ -1,4 +1,5 @@
 import { addVisibilityIcon } from "../utils/visibilityIcon";
+import { CollectionForm } from "./parts/CollectionForm";
 import { formatDateTime } from "../utils/date";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -9,10 +10,14 @@ function NoteDetailPage() {
 
   const [note, setNote] = useState(null);
   const [category, setCategory] = useState(null);
+
   const [userCollections, setUserCollections] = useState([]);
   const [existingCollectionIds, setExistingCollectionIds] = useState([]);
   const [selectedCollectionIds, setSelectedCollectionIds] = useState([]);
+
   const [showCollectionModal, setShowCollectionModal] = useState(false);
+  const [showNewCollectionModal, setShowNewCollectionModal] = useState(false);
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -180,6 +185,56 @@ function NoteDetailPage() {
     }
   }
 
+  function handleOpenCreateNewCollectionModal() {
+    // close add to collection modal
+    // open create new collection modal
+    setError("");
+    setShowCollectionModal(false);
+    setShowNewCollectionModal(true);
+  }
+
+  function handleReturnToAddToCollectionModal() {
+    // close create new collection modal
+    // open add to collection modal
+    setError("");
+    setShowNewCollectionModal(false);
+    setShowCollectionModal(true);
+  }
+
+  async function handleCreateCollection(collectionData) {
+    try {
+      setError("");
+
+      const newCollectionData = {
+        ...collectionData,
+        username: currentUsername,
+      };
+
+      const response = await fetch(
+        "http://localhost:8080/api/collections",
+        {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(newCollectionData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "Failed to create the collection"
+        );
+      }
+
+      const newCollection = await response.json();
+      setUserCollections([...userCollections, newCollection]);
+      setSelectedCollectionIds([...selectedCollectionIds, newCollection.id]);
+
+      handleReturnToAddToCollectionModal();
+    } catch (error) {
+      setError(error.message);
+    }
+  }
+
   if (loading) {
     return (
       <main className="container mt-4">
@@ -325,6 +380,13 @@ function NoteDetailPage() {
                   />
                 </div>
 
+                {/* Error */}
+                {error && (
+                  <div className="alert alert-danger mx-3 mt-3">
+                    {error}
+                  </div>
+                )}
+
                 <div className="modal-body">
                   {userCollections.map((collection) => (
                     <div
@@ -368,6 +430,16 @@ function NoteDetailPage() {
                 <div className="modal-footer">
                   <button
                     type="button"
+                    className="btn btn-primary me-auto"
+                    onClick={
+                      handleOpenCreateNewCollectionModal
+                    }
+                  >
+                    + New Collection
+                  </button>
+
+                  <button
+                    type="button"
                     className="btn btn-secondary"
                     onClick={() =>
                       setShowCollectionModal(false)
@@ -392,6 +464,16 @@ function NoteDetailPage() {
           <div className="modal-backdrop show" />
         </>
       )}
+
+
+      {/* New Collection Modal */}
+      <CollectionForm
+        collection={null}
+        show={showNewCollectionModal}
+        onClose={handleReturnToAddToCollectionModal}
+        onSave={handleCreateCollection}
+        error={error}
+      />
 
     </main>
   );
