@@ -27,25 +27,24 @@ function NoteDetailPage() {
   useEffect(() => {
     async function loadNote() {
       try {
+        // load notes
         const response = await fetch(
           `http://localhost:8080/api/notes/${id}`
         );
-
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error("Note not found");
           }
           throw new Error("Failed to load note");
         }
-
         const data = await response.json();
         setNote(data);
 
+        // load categories
         if (data.categoryId != null) {
           const categoryResponse = await fetch(
             `http://localhost:8080/api/categories/${data.categoryId}`
           );
-
           if (categoryResponse.ok) {
             const categoryData = await categoryResponse.json();
             setCategory(categoryData);
@@ -233,14 +232,6 @@ function NoteDetailPage() {
     } catch (error) {
       setError(error.message);
     }
-  }
-
-  if (loading) {
-    return (
-      <main className="container mt-4">
-        <p>Loading...</p>
-      </main>
-    );
   }
 
   if (loading) {
