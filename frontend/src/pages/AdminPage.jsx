@@ -1,19 +1,39 @@
 import { useState } from "react";
-
 import AdminNotes from "../components/admin/AdminNotes";
-// import AdminCategories from "../components/admin/AdminCategories";
-// import AdminCollections from "../components/admin/AdminCollections";
-// import AdminUsers from "../components/admin/AdminUsers";
 
-const SECTION_NAMES = [
-  "notes",
-  "categories",
-  "collections",
-  "users",
-];
+const SECTIONS = {
+  // exclude isPublic column
+  "notes": {
+    columns: [
+      "id",
+      "title",
+      "username",
+      "createdAt",
+      "updatedAt",
+    ]
+  },
+  "categories": {
+    columns: [
+      "id",
+      "name",
+      "createdAt",
+      "updatedAt",
+    ]
+  },
+  "collections": {
+    columns: [
+      "id",
+      "name",
+      "username",
+      "createdAt",
+      "updatedAt",
+    ]
+  }
+};
 
 function AdminPage() {
-  const [section, setSection] = useState(SECTION_NAMES[0]);
+  const [section, setSection] = useState(Object.keys(SECTIONS)[0]);
+  const sectionConfig = SECTIONS[section];
 
   return (
     <main className="container mt-4">
@@ -21,7 +41,7 @@ function AdminPage() {
 
       {/* Menu */}
       <div className="btn-group mb-4">
-        {SECTION_NAMES.map((sectionName) => (
+        {Object.keys(SECTIONS).map((sectionName) =>
           <button
             key={sectionName}
             type="button"
@@ -34,16 +54,14 @@ function AdminPage() {
           >
             {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
           </button>
-        ))}
+        )}
       </div>
 
       {/* Content */}
-      {section === "notes" && (<AdminNotes />)}
-      {/*
-      {section === "categories" && (<AdminCategories />)}
-      {section === "collections" && (<AdminCollections />)}
-      {section === "users" && (<AdminUsers />)}
-      */}
+      <AdminNotes
+        sectionName={section}
+        columns={sectionConfig.columns}
+      />
     </main>
   );
 }
