@@ -1,8 +1,11 @@
 import { addVisibilityIcon } from "../../utils/visibilityIcon";
 import { formatDateTime } from "../../utils/date";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export function AdminTable({sectionName, columns}) {
+  const navigate = useNavigate();
+
   const [records, setRecords] = useState([]);
   const [selectedRecordIds, setSelectedRecordIds] = useState([]);
 
@@ -42,6 +45,25 @@ export function AdminTable({sectionName, columns}) {
     } else {
       const updatedIds = [...selectedRecordIds, recordId];
       setSelectedRecordIds(updatedIds);
+    }
+  }
+
+  async function handleCreate() {
+    if (sectionName === "notes") {
+      navigate("/notes/new");
+      return;
+    }
+  }
+
+  async function handleEdit() {
+    if (selectedRecordIds.length !== 1) {
+      return;
+    }
+
+    const selectedId = selectedRecordIds[0];
+    if (sectionName === "notes") {
+      navigate(`/notes/${selectedId}/edit`);
+      return;
     }
   }
 
@@ -126,14 +148,33 @@ export function AdminTable({sectionName, columns}) {
         <h4 className="mb-0">{sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}</h4>
       </div>
 
-      <div className="mb-4 d-flex justify-content-between align-items-center">
+      <div className="d-flex align-items-center gap-2 mb-4">
         <button
+          type="button"
+          className="btn btn-outline-dark"
+          onClick={handleCreate}
+        >
+          + Create New
+        </button>
+
+        <button
+          type="button"
+          className="btn btn-outline-dark"
+          disabled={selectedRecordIds.length !== 1}
+          onClick={handleEdit}
+        >
+          Edit
+        </button>
+
+        <button
+          type="button"
           className="btn btn-danger"
           disabled={selectedRecordIds.length === 0}
           onClick={handleDeleteSelected}
         >
           Delete Selected
         </button>
+
         <span className="text-muted">
           {selectedRecordIds.length} / {records.length} {sectionName.slice(0, -1)}(s)
         </span>
