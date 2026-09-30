@@ -1,4 +1,4 @@
-import { CollectionCard } from "../pages/parts/CollectionCard"
+import { CollectionCard } from "../components/collection/CollectionCard"
 import { useEffect, useState } from "react";
 
 // wip
