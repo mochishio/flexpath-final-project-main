@@ -1,3 +1,4 @@
+import { capitalize } from "../utils/formatText";
 import { useState } from "react";
 import AdminNotes from "../components/admin/AdminTable";
 
@@ -52,7 +53,7 @@ function AdminPage() {
             }
             onClick={() => setSection(sectionName)}
           >
-            {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
+            {capitalize(sectionName)}
           </button>
         )}
       </div>

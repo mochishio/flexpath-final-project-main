@@ -1,4 +1,4 @@
-import { addVisibilityIcon } from "../../utils/formatText";
+import { addVisibilityIcon, capitalize } from "../../utils/formatText";
 import { formatDateTime } from "../../utils/date";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -101,7 +101,7 @@ export function AdminTable({sectionName, columns}) {
   }
 
   function formatHeaderValue(headerName) {
-    headerName = headerName.charAt(0).toUpperCase() + headerName.slice(1);
+    headerName = capitalize(headerName);
 
     if (headerName.includes("At")) {
       headerName = headerName.replace("At", "");
@@ -145,7 +145,7 @@ export function AdminTable({sectionName, columns}) {
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4 className="mb-0">{sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}</h4>
+        <h4 className="mb-0">{capitalize(sectionName)}</h4>
       </div>
 
       <div className="d-flex align-items-center gap-2 mb-4">
@@ -154,7 +154,7 @@ export function AdminTable({sectionName, columns}) {
           className="btn btn-outline-dark"
           onClick={handleCreate}
         >
-          + Create New
+          + New {capitalize(sectionName)}
         </button>
 
         <button
