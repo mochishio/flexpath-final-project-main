@@ -1,4 +1,4 @@
-import { addVisibilityIcon } from "../utils/visibilityIcon";
+import { addVisibilityIcon } from "../utils/formatText";
 import { CollectionForm } from "../components/collection/CollectionForm";
 import { formatDateTime } from "../utils/date";
 import { useEffect, useState } from "react";

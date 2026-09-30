@@ -1,4 +1,4 @@
-import { addVisibilityIcon } from "../../utils/visibilityIcon";
+import { addVisibilityIcon } from "../../utils/formatText";
 import { CollectionForm } from "../collection/CollectionForm";
 import { Link } from "react-router-dom";
 import { formatDateTime } from "../../utils/date";

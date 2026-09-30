@@ -1,4 +1,4 @@
-import { addVisibilityIcon } from "../utils/visibilityIcon";
+import { addVisibilityIcon } from "../utils/formatText";
 import { formatDateTime } from "../utils/date";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
