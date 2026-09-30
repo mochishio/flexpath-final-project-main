@@ -2,7 +2,7 @@ import { addVisibilityIcon } from "../../utils/visibilityIcon";
 import { formatDateTime } from "../../utils/date";
 import { useEffect, useState } from "react";
 
-export function AdminNotes({sectionName, columns}) {
+export function AdminTable({sectionName, columns}) {
   const [records, setRecords] = useState([]);
   const [selectedRecordIds, setSelectedRecordIds] = useState([]);
 
@@ -177,4 +177,4 @@ export function AdminNotes({sectionName, columns}) {
   );
 }
 
-export default AdminNotes;
+export default AdminTable;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import AdminNotes from "../components/admin/AdminNotes";
+import AdminNotes from "../components/admin/AdminTable";
 
 const SECTIONS = {
   // exclude isPublic column
