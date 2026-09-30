@@ -31,6 +31,9 @@ function App() {
               </li>
             </ul>
           </div>
+
+          <NavLink className="nav-link text-light me-4"to="/admin" title="Admin">🛠️ Admin</NavLink>
+
         </div>
       </nav>
       <hr />
