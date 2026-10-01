@@ -1,6 +1,6 @@
 import { capitalize } from "../utils/formatText";
 import { useState } from "react";
-import AdminNotes from "../components/admin/AdminTable";
+import AdminTable from "../components/admin/AdminTable";
 
 const SECTIONS = {
   // exclude isPublic column
@@ -59,7 +59,7 @@ function AdminPage() {
       </div>
 
       {/* Content */}
-      <AdminNotes
+      <AdminTable
         sectionName={section}
         columns={sectionConfig.columns}
       />
