@@ -2,6 +2,7 @@ import { addVisibilityIcon } from "../utils/formatText";
 import { CollectionForm } from "../components/collection/CollectionForm";
 import { fetchJson } from "../services/fetch";
 import { formatDateTime } from "../utils/date";
+import { handleApiError } from "../services/handleApiError";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
@@ -37,8 +38,8 @@ function NoteDetailPage() {
           const categoryData = await fetchJson(`http://localhost:8080/api/categories/${data.categoryId}`);
           setCategory(categoryData);
         }
-
       } catch (error) {
+        handleApiError(error, navigate, setError);
         setError(error.message);
       } finally {
         setLoading(false);

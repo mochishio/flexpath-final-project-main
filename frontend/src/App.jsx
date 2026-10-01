@@ -7,6 +7,7 @@ import CollectionsPage from "./pages/CollectionsPage";
 import AdminPage from "./pages/AdminPage";
 
 import PageNotFound from "./components/404";
+import ServerError from "./components/500";
 
 function App() {
 
@@ -46,6 +47,10 @@ function App() {
         <Route path="/collections" element={<CollectionsPage />} />
 
         <Route path="/admin" element={<AdminPage />} />
+
+        <Route path="/404" element={<PageNotFound />} />
+        <Route path="/500" element={<ServerError />} />
+
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </>
