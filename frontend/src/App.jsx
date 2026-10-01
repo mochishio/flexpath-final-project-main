@@ -1,7 +1,4 @@
-import { useState } from "react";
 import { NavLink, Route, Routes } from "react-router-dom";
-
-import ErrorBoundary from "./services/errorBoundary";
 
 import NotesPage from "./pages/NotesPage";
 import NoteDetailPage from "./pages/NoteDetailPage";
@@ -49,11 +46,6 @@ function App() {
         <Route path="/collections" element={<CollectionsPage />} />
 
         <Route path="/admin" element={<AdminPage />} />
-        {/* <Route path="/search" element={
-          <ErrorBoundary>
-            <Search result={searchResult} setResult={setSearchResult} />
-          </ErrorBoundary>
-        } /> */}
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </>
