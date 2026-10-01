@@ -1,5 +1,6 @@
 import { addVisibilityIcon } from "../../utils/formatText";
 import { CollectionForm } from "../collection/CollectionForm";
+import { fetchJson } from "../../services/fetch";
 import { Link } from "react-router-dom";
 import { formatDateTime } from "../../utils/date";
 import { useState } from "react";
@@ -24,17 +25,10 @@ export function CollectionCard({
     }
 
     try {
-      const response = await fetch(
+      await fetchJson(
         `http://localhost:8080/api/collections/${collection.id}/notes/${noteId}`,
-        {
-          method: "DELETE",
-        }
+        { method: "DELETE" }
       );
-      if (!response.ok) {
-        throw new Error(
-          "Failed to remove note from collection"
-        );
-      }
 
       onNoteRemoved(collection.id, noteId);
     } catch (error) {
@@ -51,7 +45,7 @@ export function CollectionCard({
     try {
       setError("");
 
-      const response = await fetch(
+      const updatedCollection = await fetchJson(
         `http://localhost:8080/api/collections/${collection.id}`,
         {
           method: "PUT",
@@ -59,12 +53,7 @@ export function CollectionCard({
           body: JSON.stringify(collectionData),
         }
       );
-      if (!response.ok) {
-        throw new Error(
-          "Failed to update the collection"
-        );
-      }
-      const updatedCollection = await response.json();
+
       onCollectionUpdated(updatedCollection);
       setShowCollectionModal(false);
     } catch (error) {

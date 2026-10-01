@@ -1,4 +1,5 @@
 import { CollectionCard } from "../components/collection/CollectionCard"
+import { fetchJson } from "../services/fetch";
 import { useEffect, useState } from "react";
 
 // wip
@@ -27,21 +28,12 @@ function CollectionsPage() {
         setError("");
 
         // get collections
-        const myResponse = await fetch(
+        const myData = await fetchJson(
           `http://localhost:8080/api/collections/user/${currentUsername}`
         );
-        const publicResponse = await fetch(
-          "http://localhost:8080/api/collections/public"
+        const publicData = await fetchJson(
+          "http://localhost:8080/api/collections/public",
         );
-
-        if (!myResponse.ok || !publicResponse.ok) {
-          throw new Error(
-            "Failed to load collections"
-          );
-        }
-
-        const myData = await myResponse.json();
-        const publicData = await publicResponse.json();
         const otherPublicCollections =
           publicData.filter(
             (collection) =>
@@ -58,15 +50,9 @@ function CollectionsPage() {
         const notesByCollectionData = {};
         const allCollections = [...myData, ...otherPublicCollections];
         for (const collection of allCollections) {
-          const reponse = await fetch(
+          const notes = await fetchJson(
             `http://localhost:8080/api/collections/${collection.id}/notes`
           );
-          if (!reponse.ok) {
-            throw new Error(
-              "Failed to load collection notes"
-            );
-          }
-          const notes = await reponse.json();
           notesByCollectionData[collection.id] = notes;
         }
         setNotesByCollection(notesByCollectionData);

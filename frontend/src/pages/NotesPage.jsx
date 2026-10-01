@@ -1,4 +1,5 @@
 import { addVisibilityIcon } from "../utils/formatText";
+import { fetchJson } from "../services/fetch";
 import { formatDateTime } from "../utils/date";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -32,16 +33,12 @@ function NotesPage() {
       try {
         setError("");
 
-        const getNotesURL = isPublicMode
+        let data = await fetchJson(
+          isPublicMode
           ? "http://localhost:8080/api/notes"
-          : `http://localhost:8080/api/notes/user/${currentUsername}`;
+          : `http://localhost:8080/api/notes/user/${currentUsername}`,
+        );
 
-        const response = await fetch(getNotesURL);
-        if (!response.ok) {
-          throw new Error("Failed to load notes");
-        }
-
-        let data = await response.json();
         if (isPublicMode) {
           data = data.filter((note) => (note.isPublic === true));
         }
@@ -59,15 +56,7 @@ function NotesPage() {
   useEffect(() => {
     async function loadCategories() {
       try {
-        const response = await fetch(
-          "http://localhost:8080/api/categories"
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to load categories");
-        }
-
-        const data = await response.json();
+        const data = await fetchJson("http://localhost:8080/api/categories");
         setCategories(data);
       } catch (error) {
         setError(error.message);

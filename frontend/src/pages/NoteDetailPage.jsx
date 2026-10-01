@@ -1,5 +1,6 @@
 import { addVisibilityIcon } from "../utils/formatText";
 import { CollectionForm } from "../components/collection/CollectionForm";
+import { fetchJson } from "../services/fetch";
 import { formatDateTime } from "../utils/date";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -28,28 +29,15 @@ function NoteDetailPage() {
     async function loadNote() {
       try {
         // load notes
-        const response = await fetch(
-          `http://localhost:8080/api/notes/${id}`
-        );
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error("Note not found");
-          }
-          throw new Error("Failed to load note");
-        }
-        const data = await response.json();
+        const data = await fetchJson(`http://localhost:8080/api/notes/${id}`);
         setNote(data);
 
         // load categories
         if (data.categoryId != null) {
-          const categoryResponse = await fetch(
-            `http://localhost:8080/api/categories/${data.categoryId}`
-          );
-          if (categoryResponse.ok) {
-            const categoryData = await categoryResponse.json();
-            setCategory(categoryData);
-          }
+          const categoryData = await fetchJson(`http://localhost:8080/api/categories/${data.categoryId}`);
+          setCategory(categoryData);
         }
+
       } catch (error) {
         setError(error.message);
       } finally {
@@ -70,17 +58,10 @@ function NoteDetailPage() {
     }
 
     try {
-      const response = await fetch(
+      await fetchJson(
         `http://localhost:8080/api/notes/${id}`,
-        {
-          method: "DELETE",
-        }
+        { method: "DELETE", }
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete note");
-      }
-
       navigate("/");
     } catch (error) {
       setError(error.message);
@@ -92,26 +73,15 @@ function NoteDetailPage() {
       setError("");
 
       // get user's collections
-      const collectionsResponse = await fetch(
-        `http://localhost:8080/api/collections/user/${currentUsername}`
+      const collections = await fetchJson(
+        `http://localhost:8080/api/collections/user/${currentUsername}`,
       );
-      if (!collectionsResponse.ok) {
-        throw new Error("Failed to get collections");
-      }
-      const collections =
-        await collectionsResponse.json();
       setUserCollections(collections);
 
       // get collections where the note already belongs to
-      const noteCollectionsResponse = await fetch(
-        `http://localhost:8080/api/notes/${note.id}/collections`
+      const noteCollections = await fetchJson(
+         `http://localhost:8080/api/notes/${note.id}/collections`,
       );
-      if (!noteCollectionsResponse.ok) {
-        throw new Error(
-          "Failed to get note collections"
-        );
-      }
-      const noteCollections = await noteCollectionsResponse.json();
       const ids = noteCollections.map(
         (collection) => collection.id
       );
@@ -149,32 +119,21 @@ function NoteDetailPage() {
 
       // Add
       for (const collectionId of collectionIdsToAdd) {
-        const response = await fetch(
+        await fetchJson(
           `http://localhost:8080/api/collections/${collectionId}/notes/${note.id}`,
           {
             method: "POST",
-          }
+            headers: {"Content-Type": "application/json"},
+          },
         );
-        if (!response.ok) {
-          throw new Error(
-            "Failed to add note to collection"
-          );
-        }
       }
 
       // Remove
       for (const collectionId of collectionIdsToRemove) {
-        const response = await fetch(
+        await fetchJson(
           `http://localhost:8080/api/collections/${collectionId}/notes/${note.id}`,
-          {
-            method: "DELETE",
-          }
+          { method: "DELETE" }
         );
-        if (!response.ok) {
-          throw new Error(
-            "Failed to remove note from collection"
-          );
-        }
       }
 
       setShowCollectionModal(false);
@@ -209,7 +168,7 @@ function NoteDetailPage() {
         username: currentUsername,
       };
 
-      const response = await fetch(
+      const newCollection = await fetchJson(
         "http://localhost:8080/api/collections",
         {
           method: "POST",
@@ -218,13 +177,6 @@ function NoteDetailPage() {
         }
       );
 
-      if (!response.ok) {
-        throw new Error(
-          "Failed to create the collection"
-        );
-      }
-
-      const newCollection = await response.json();
       setUserCollections([...userCollections, newCollection]);
       setSelectedCollectionIds([...selectedCollectionIds, newCollection.id]);
 

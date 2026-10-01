@@ -1,3 +1,4 @@
+import { fetchJson } from "../services/fetch";
 import { formatDateTime } from "../utils/date";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -28,27 +29,16 @@ function NoteFormPage() {
         setError("");
 
         // Categories
-        const categoriesResponse = await fetch(
+        const categoriesData = await fetchJson(
           "http://localhost:8080/api/categories"
         );
-        if (!categoriesResponse.ok) {
-          throw new Error("Failed to get categories");
-        }
-        const categoriesData = await categoriesResponse.json();
         setCategories(categoriesData);
 
         // Note
         if (isEditMode) {
-          const noteResponse = await fetch(
+          const noteData = await fetchJson(
             `http://localhost:8080/api/notes/${id}`
           );
-          if (!noteResponse.ok) {
-            if (noteResponse.status === 404) {
-              throw new Error("Note not found");
-            }
-            throw new Error("Failed to load note");
-          }
-          const noteData = await noteResponse.json();
           setTitle(noteData.title);
           setCategoryId(noteData.categoryId ?? "");
           setIsPublic(noteData.isPublic);
@@ -83,31 +73,16 @@ function NoteFormPage() {
             : Number(categoryId),
       };
 
-      const url = isEditMode
+      const savedNote = await fetchJson(
+        isEditMode
         ? `http://localhost:8080/api/notes/${id}`
-        : "http://localhost:8080/api/notes";
-
-      const method = isEditMode
-        ? "PUT"
-        : "POST";
-
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(noteData),
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          isEditMode
-            ? "Failed to update note"
-            : "Failed to create note"
-        );
-      }
-
-      const savedNote = await response.json();
+        : "http://localhost:8080/api/notes",
+        {
+          method: isEditMode ? "PUT" : "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(noteData),
+        }
+      );
 
       navigate(`/notes/${savedNote.id}`);
 

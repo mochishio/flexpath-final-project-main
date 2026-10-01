@@ -17,14 +17,7 @@ export function AdminTable({sectionName, columns}) {
       try {
         setError("");
 
-        const response = await fetch(
-          `http://localhost:8080/api/${sectionName}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to load records");
-        }
-
-        const data = await response.json();
+        const data = await fetchJson(`http://localhost:8080/api/${sectionName}`);
         setRecords(data);
 
       } catch (error) {
@@ -77,16 +70,10 @@ export function AdminTable({sectionName, columns}) {
       setError("");
 
       for (const recordId of selectedRecordIds) {
-        const response = await fetch(
-          `http://localhost:8080/api/records/${recordId}`,
-          {
-            method: "DELETE",
-          }
+        await fetchJson(
+          `http://localhost:8080/api/${sectionName}/${recordId}`,
+          { method: "DELETE" }
         );
-
-        if (!response.ok) {
-          throw new Error("Failed to delete records");
-        }
       }
 
       const updatedRecords = records.filter(
