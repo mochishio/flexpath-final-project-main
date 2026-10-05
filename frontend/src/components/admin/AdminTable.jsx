@@ -26,9 +26,11 @@ export function AdminTable({sectionName, columns}) {
     async function loadRecords() {
       try {
         setError("");
+        setLoading(true);
 
         const data = await fetchJson(`http://localhost:8080/api/${sectionName}`);
         setRecords(data);
+        setSelectedRecordIds([]);
 
       } catch (error) {
         setError(error.message);
@@ -192,12 +194,6 @@ export function AdminTable({sectionName, columns}) {
     return <p>Loading...</p>;
   }
 
-  if (error) {
-    return (
-      <div className="alert alert-danger">{error}</div>
-    );
-  }
-
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -210,7 +206,7 @@ export function AdminTable({sectionName, columns}) {
           className="btn btn-outline-dark"
           onClick={handleCreate}
         >
-          + New {capitalize(sectionName)}
+          + New {capitalize(sectionName).slice(0, -1).replace("ie", "y")}
         </button>
 
         <button
@@ -236,13 +232,19 @@ export function AdminTable({sectionName, columns}) {
         </span>
       </div>
 
+      {error && (
+        <div className="alert alert-danger">
+          {error}
+        </div>
+      )}
+
       <div className="table-responsive">
         <table className="table table-hover align-middle">
           <thead>
             <tr>
               <th></th>
               {columns.map((column) =>
-                <th key={column.key}>
+                <th key={column}>
                   {formatHeaderValue(column)}
                 </th>
               )}
@@ -261,7 +263,7 @@ export function AdminTable({sectionName, columns}) {
                   />
                 </td>
                 {columns.map((column) =>
-                  <td key={column.key}>
+                  <td key={column}>
                     {formatValue(record, column)}
                   </td>
                 )}

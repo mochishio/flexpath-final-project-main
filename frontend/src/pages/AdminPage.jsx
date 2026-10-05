@@ -4,6 +4,7 @@ import AdminTable from "../components/admin/AdminTable";
 
 const SECTIONS = {
   // exclude isPublic column
+
   "notes": {
     columns: [
       "id",
