@@ -1,13 +1,23 @@
 import { addVisibilityIcon, capitalize } from "../../utils/formatText";
+import { CollectionForm } from "../collection/CollectionForm";
+import { fetchJson } from "../../services/fetch";
 import { formatDateTime } from "../../utils/date";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export function AdminTable({sectionName, columns}) {
+  // wip
+  const currentUsername = "user";
+
   const navigate = useNavigate();
 
+  // to show table content
   const [records, setRecords] = useState([]);
   const [selectedRecordIds, setSelectedRecordIds] = useState([]);
+
+  // to create/edit a collection
+  const [collection, setCollection] = useState(null);
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -41,22 +51,81 @@ export function AdminTable({sectionName, columns}) {
     }
   }
 
-  async function handleCreate() {
+  function handleCreate() {
     if (sectionName === "notes") {
       navigate("/notes/new");
       return;
     }
+
+    if (sectionName === "collections") {
+      setCollection(null);
+      setShowCollectionModal(true);
+      return;
+    }
   }
 
-  async function handleEdit() {
+  function handleEdit() {
     if (selectedRecordIds.length !== 1) {
       return;
     }
 
     const selectedId = selectedRecordIds[0];
+
     if (sectionName === "notes") {
       navigate(`/notes/${selectedId}/edit`);
       return;
+    }
+
+    if (sectionName === "collections") {
+      const selectedCollection = records.find((record) =>
+        record.id === selectedId
+      );
+      setCollection(selectedCollection);
+      setShowCollectionModal(true);
+      return;
+    }
+  }
+
+  async function handleSaveCollection(collectionData) {
+    try {
+      setError("");
+
+      let savedCollectionData = {...collectionData};
+      if (collection == null) {
+        savedCollectionData.username = currentUsername;
+      }
+
+      const savedCollection = await fetchJson(
+        collection == null
+        ? "http://localhost:8080/api/collections"
+        : `http://localhost:8080/api/collections/${collection.id}`,
+        {
+          method: collection == null ? "POST" : "PUT",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(savedCollectionData),
+        }
+      );
+
+      let updatedRecords;
+      if (collection == null) {
+        // create
+        updatedRecords = [...records, savedCollection];
+      } else {
+        // update
+        updatedRecords = records.map((record) => {
+          if (record.id === savedCollection.id) {
+            return savedCollection;
+          }
+          return record;
+        });
+      }
+      setRecords(updatedRecords);
+
+      setSelectedRecordIds([]);
+      setCollection(null);
+      setShowCollectionModal(false);
+    } catch (error) {
+      setError(error.message);
     }
   }
 
@@ -201,6 +270,20 @@ export function AdminTable({sectionName, columns}) {
           </tbody>
         </table>
       </div>
+
+
+      {/* Modal to create/edit a collection */}
+      <CollectionForm
+        collection={collection}
+        show={showCollectionModal}
+        onClose={() => {
+            setShowCollectionModal(false);
+            setCollection(null);
+        }}
+        onSave={handleSaveCollection}
+        error={error}
+      />
+
     </div>
   );
 }
