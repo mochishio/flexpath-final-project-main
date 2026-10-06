@@ -9,7 +9,7 @@ import { useState } from "react";
 const currentUsername = "user";
 
 export function CollectionCard({
-  collection, notes, onNoteRemoved, onCollectionUpdated
+  collection, notes, onNoteRemoved, onCollectionUpdated, onCollectionDeleted
 }) {
   const isOwner = collection.username === currentUsername;
 
@@ -55,6 +55,27 @@ export function CollectionCard({
       );
 
       onCollectionUpdated(updatedCollection);
+      setShowCollectionModal(false);
+    } catch (error) {
+      setError(error.message);
+    }
+  }
+
+  async function handleDeleteCollection() {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this collection?"
+    );
+    if (!confirmed) { return; }
+
+    try {
+      setError("");
+
+      await fetchJson(
+        `http://localhost:8080/api/collections/${collection.id}`,
+        { method: "DELETE" }
+      );
+
+      onCollectionDeleted(collection.id);
       setShowCollectionModal(false);
     } catch (error) {
       setError(error.message);
@@ -153,6 +174,7 @@ export function CollectionCard({
       <CollectionForm
         collection={collection}
         show={showCollectionModal}
+        onDelete={handleDeleteCollection}
         onClose={() =>
           setShowCollectionModal(false)
         }

@@ -185,6 +185,14 @@ function CollectionsPage() {
       setDisplayedMyCollections(updatedCollections);
   }
 
+  function handleCollectionDeleted(collectionId) {
+    const updatedCollections = myCollections.filter(
+        (collection) => collection.id !== collectionId
+      );
+    setMyCollections(updatedCollections);
+    setDisplayedMyCollections(updatedCollections);
+  }
+
   return (
     <main className="container mt-4">
       <div className="row g-3">
@@ -320,6 +328,7 @@ function CollectionsPage() {
                   notes={notesByCollection[collection.id] ?? []}
                   onNoteRemoved={handleNoteRemoved}
                   onCollectionUpdated={handleCollectionUpdated}
+                  onCollectionDeleted={handleCollectionDeleted}
                 />
               )
             )}

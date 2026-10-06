@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 export function CollectionForm({
   collection,
   show,
+  onDelete,
   onClose,
   onSave,
   error
@@ -172,6 +173,16 @@ export function CollectionForm({
             </div>
 
             <div className="modal-footer">
+            {isEditMode && (
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={onDelete}
+              >
+                Delete
+              </button>
+            )}
+
               <button
                 type="button"
                 className="btn btn-secondary"
