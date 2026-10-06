@@ -32,7 +32,9 @@ export function CollectionForm({
     }
   }, [show, collection, isEditMode]);
 
-  function handleSave() {
+  function handleSave(event) {
+    event.preventDefault();
+
     const collectionData = {
       name: name,
       description: description,
@@ -53,8 +55,10 @@ export function CollectionForm({
         tabIndex="-1"
       >
         <div className="modal-dialog">
-          <div className="modal-content">
-
+          <form
+            className="modal-content"
+            onSubmit={handleSave}
+          >
             <div className="modal-header">
               <h5 className="modal-title">
                 {isEditMode
@@ -192,15 +196,14 @@ export function CollectionForm({
               </button>
 
               <button
-                type="button"
+                type="submit"
                 className="btn btn-primary"
-                onClick={handleSave}
               >
                 {isEditMode ? "Save" : "Create"}
               </button>
             </div>
 
-          </div>
+          </form>
         </div>
       </div>
 
