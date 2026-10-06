@@ -353,10 +353,10 @@ function NotesPage() {
             key={note.id}
           >
             <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div style={{ width: "350px" }}>
+              <div className="row g-3 align-items-center">
+                <div className="col-12 col-md-4 col-lg-4">
                   <h5
-                    className="text-truncate mb-0"
+                    className="mb-0"
                     title={note.title}
                   >
                     {addVisibilityIcon(note.isPublic, note.title)}
@@ -367,7 +367,7 @@ function NotesPage() {
                   </div>
                 </div>
 
-                <div>
+                <div className="col-12 col-md-2 col-lg-3">
                   <div>Category</div>
                   <span className="text-muted">
                     {
@@ -378,27 +378,28 @@ function NotesPage() {
                   </span>
                 </div>
 
-                <div>
+                <div className="col-6 col-md-2 col-lg-2">
                   <div>Created</div>
                   <span className="text-muted">
                     {formatDateTime(note.createdAt)}
                   </span>
                 </div>
 
-                <div>
+                <div className="col-6 col-md-2 col-lg-2">
                   <div>Updated</div>
                   <span className="text-muted">
                     {formatDateTime(note.updatedAt)}
                   </span>
                 </div>
 
-                <Link
-                  className="btn btn-outline-dark"
-                  to={`/notes/${note.id}`}
-                >
-                  Detail
-                </Link>
-
+                <div className="col-12 col-md-2 col-lg-1">
+                  <Link
+                    className="btn btn-outline-dark"
+                    to={`/notes/${note.id}`}
+                  >
+                    Detail
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
