@@ -125,7 +125,7 @@ export function CollectionCard({
               className="row py-2 border-bottom"
             >
               {/* Title */}
-              <div className={isOwner ? "col-6": "col-8"}>
+              <div className={isOwner ? "col-5": "col-8"}>
                 <div
                   className="text-truncate"
                   title={note.title}
@@ -156,7 +156,7 @@ export function CollectionCard({
 
               {/* Remove from collection */}
               {isOwner &&
-                <div className="col-2">
+                <div className="col-3">
                   <button
                     className="btn btn-sm btn-outline-secondary align-self-start"
                     onClick={() => handleRemove(note.id)}>

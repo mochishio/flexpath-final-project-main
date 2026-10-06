@@ -309,7 +309,7 @@ function CollectionsPage() {
 
       <div className="row g-4">
         {/* My Collections */}
-        <div className="col-md-6">
+        <div className="col-12 col-lg-6">
           <div className="d-flex align-items-center gap-3 mb-2">
             <h4>
               My Collections
@@ -342,7 +342,7 @@ function CollectionsPage() {
         </div>
 
         {/* Public Collections */}
-        <div className="col-md-6">
+        <div className="col-12 col-lg-6">
           <div className="d-flex align-items-center gap-3 mb-2">
             <h4>
             Public Collections
