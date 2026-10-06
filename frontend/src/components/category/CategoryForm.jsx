@@ -9,8 +9,6 @@ export function CategoryForm({
 }) {
   const [name, setName] = useState("");
   const isEditMode = category != null;
-  console.log("isEditMode = ", isEditMode);
-  console.log("category = ", category);
 
   useEffect(() => {
     if (!show) { return; }
