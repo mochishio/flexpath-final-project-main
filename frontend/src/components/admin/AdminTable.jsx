@@ -1,4 +1,5 @@
 import { addVisibilityIcon, capitalize } from "../../utils/formatText";
+import { CategoryForm } from "../category/CategoryForm";
 import { CollectionForm } from "../collection/CollectionForm";
 import { fetchJson } from "../../services/fetch";
 import { formatDateTime } from "../../utils/date";
@@ -18,6 +19,10 @@ export function AdminTable({sectionName, columns}) {
   // to create/edit a collection
   const [collection, setCollection] = useState(null);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
+
+  // to create/edit a category
+  const [category, setCategory] = useState(null);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -64,6 +69,12 @@ export function AdminTable({sectionName, columns}) {
       setShowCollectionModal(true);
       return;
     }
+
+    if (sectionName === "categories") {
+      setCategory(null);
+      setShowCategoryModal(true);
+      return;
+    }
   }
 
   function handleEdit() {
@@ -84,6 +95,15 @@ export function AdminTable({sectionName, columns}) {
       );
       setCollection(selectedCollection);
       setShowCollectionModal(true);
+      return;
+    }
+
+    if (sectionName === "categories") {
+      const selectedCategory = records.find((record) =>
+        record.id === selectedId
+      );
+      setCategory(selectedCategory);
+      setShowCategoryModal(true);
       return;
     }
   }
@@ -127,6 +147,53 @@ export function AdminTable({sectionName, columns}) {
       setCollection(null);
       setShowCollectionModal(false);
     } catch (error) {
+      setError(error.message);
+    }
+  }
+
+  async function handleSaveCategory(categoryData) {
+    try {
+      setError("");
+
+      let savedCategoryData = {...categoryData};
+      if (category == null) {
+        savedCategoryData.username = currentUsername;
+      }
+
+      const savedCategory = await fetchJson(
+        category == null
+        ? "http://localhost:8080/api/categories"
+        : `http://localhost:8080/api/categories/${category.id}`,
+        {
+          method: category == null ? "POST" : "PUT",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(savedCategoryData),
+        }
+      );
+
+      let updatedRecords;
+      if (category == null) {
+        // create
+        updatedRecords = [...records, savedCategory];
+      } else {
+        // update
+        updatedRecords = records.map((record) => {
+          if (record.id === savedCategory.id) {
+            return savedCategory;
+          }
+          return record;
+        });
+      }
+      setRecords(updatedRecords);
+
+      setSelectedRecordIds([]);
+      setCategory(null);
+      setShowCategoryModal(false);
+    } catch (error) {
+      if (error.status === 409) {
+        setError("A category with this name already exists.");
+        return;
+      }
       setError(error.message);
     }
   }
@@ -281,8 +348,23 @@ export function AdminTable({sectionName, columns}) {
         onClose={() => {
             setShowCollectionModal(false);
             setCollection(null);
+            setError("");
         }}
         onSave={handleSaveCollection}
+        error={error}
+      />
+
+
+      {/* Modal to create/edit a category*/}
+      <CategoryForm
+        category={category}
+        show={showCategoryModal}
+        onClose={() => {
+            setShowCategoryModal(false);
+            setCategory(null);
+            setError("");
+        }}
+        onSave={handleSaveCategory}
         error={error}
       />
 
