@@ -266,7 +266,7 @@ function NoteDetailPage() {
           <div className="mb-4">
             <div>
               <strong>Category: </strong>
-              {category ? category.name : "None"}
+              {category ? category.name : "--"}
             </div>
 
             <div>

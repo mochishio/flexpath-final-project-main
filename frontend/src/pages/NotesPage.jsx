@@ -368,14 +368,25 @@ function NotesPage() {
                 </div>
 
                 <div>
-                  <div>Created at</div>
+                  <div>Category</div>
+                  <span className="text-muted">
+                    {
+                      categories.find(
+                        (category) => category.id === note.categoryId
+                      )?.name ?? "--"
+                    }
+                  </span>
+                </div>
+
+                <div>
+                  <div>Created</div>
                   <span className="text-muted">
                     {formatDateTime(note.createdAt)}
                   </span>
                 </div>
 
                 <div>
-                  <div>Updated at</div>
+                  <div>Updated</div>
                   <span className="text-muted">
                     {formatDateTime(note.updatedAt)}
                   </span>

@@ -183,9 +183,7 @@ function NoteFormPage() {
                   setCategoryId(event.target.value)
                 }
               >
-                <option value="">
-                  None
-                </option>
+                <option value="">--</option>
 
                 {categories.map((category) => (
                   <option
