@@ -43,8 +43,14 @@ function CollectionsPage() {
 
         setMyCollections(myData);
         setPublicCollections(otherPublicCollections);
-        setDisplayedMyCollections(myData);
-        setDisplayedPublicCollections(otherPublicCollections);
+        const sortedMyCollections = [...myData].sort(
+          (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+        );
+        const sortedOtherPublicCollections = [...otherPublicCollections].sort(
+          (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+        );
+        setDisplayedMyCollections(sortedMyCollections);
+        setDisplayedPublicCollections(sortedOtherPublicCollections);
 
         // get collection notes
         const notesByCollectionData = {};

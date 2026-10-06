@@ -42,8 +42,12 @@ function NotesPage() {
         if (isPublicMode) {
           data = data.filter((note) => (note.isPublic === true));
         }
+
         setNotes(data);
-        setDisplayedNotes(data);
+        const sortedData = [...data].sort(
+          (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+        );
+        setDisplayedNotes(sortedData);
       } catch (error) {
         setError(error.message);
       }
