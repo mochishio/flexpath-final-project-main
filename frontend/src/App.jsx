@@ -1,5 +1,6 @@
 import { NavLink, Route, Routes } from "react-router-dom";
 
+import LoginPage from "./pages/LoginPage";
 import NotesPage from "./pages/NotesPage";
 import NoteDetailPage from "./pages/NoteDetailPage";
 import NoteFormPage from "./pages/NoteFormPage";
@@ -37,6 +38,7 @@ function App() {
       <hr />
 
       <Routes>
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<NotesPage />} />
         <Route path="/public" element={<NotesPage />} />
 
