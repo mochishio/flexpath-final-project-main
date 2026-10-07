@@ -5,12 +5,15 @@ export async function fetchJson(url, options = {}) {
     controller.abort();
   }, timeout);
 
+  const accessToken = localStorage.getItem("accessToken")
+
   try {
     const response = await fetch(url, {
       ...options,
       signal: controller.signal,
       headers: {
         Accept: "application/json",
+        ...(accessToken && {Authorization: accessToken}),
         ...options.headers,
       },
     });

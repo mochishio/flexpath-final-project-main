@@ -1,9 +1,13 @@
 import { fetchJson } from "../services/fetch";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -26,8 +30,10 @@ export default function LoginPage() {
         }
       );
 
-      // wip
-      console.log(data);
+      const accessToken = data.accessToken.token;
+      localStorage.setItem("accessToken", accessToken);
+
+      navigate("/");
 
     } catch (error) {
       setError("Invalid username or password.");
