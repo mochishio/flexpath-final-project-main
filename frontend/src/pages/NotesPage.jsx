@@ -28,6 +28,9 @@ function NotesPage() {
 
   // Load Notes
   useEffect(() => {
+    // wait until the current user is loaded
+    if (!isPublicMode && !currentUsername) { return; }
+
     handleClear();
 
     async function loadNotes() {
@@ -55,7 +58,7 @@ function NotesPage() {
     }
 
     loadNotes();
-  }, [isPublicMode]);
+  }, [isPublicMode, currentUsername]);
 
   // Load Categories
   useEffect(() => {

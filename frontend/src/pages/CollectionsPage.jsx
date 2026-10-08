@@ -24,6 +24,9 @@ function CollectionsPage() {
 
   // Load Collections
   useEffect(() => {
+    // wait until the current user is loaded
+    if (!currentUsername) { return; }
+
     async function loadCollections() {
       try {
         setError("");
@@ -68,7 +71,7 @@ function CollectionsPage() {
       }
     }
     loadCollections();
-  }, []);
+  }, [currentUsername]);
 
   function handleSearch() {
     let myResult = [...myCollections];
