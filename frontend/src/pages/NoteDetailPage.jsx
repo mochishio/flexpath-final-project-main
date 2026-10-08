@@ -3,12 +3,16 @@ import { CollectionForm } from "../components/collection/CollectionForm";
 import { fetchJson } from "../services/fetch";
 import { formatDateTime } from "../utils/date";
 import { handleApiError } from "../services/handleApiError";
+import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 function NoteDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const { currentUser } = useAuth();
+  const currentUsername = currentUser?.username;
 
   const [note, setNote] = useState(null);
   const [category, setCategory] = useState(null);
@@ -22,9 +26,6 @@ function NoteDetailPage() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-
-  // wip
-  const currentUsername = "user";
 
   useEffect(() => {
     async function loadNote() {

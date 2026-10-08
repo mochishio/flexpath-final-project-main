@@ -3,14 +3,15 @@ import { CollectionForm } from "../collection/CollectionForm";
 import { fetchJson } from "../../services/fetch";
 import { Link } from "react-router-dom";
 import { formatDateTime } from "../../utils/date";
+import { useAuth } from "../../context/AuthContext";
 import { useState } from "react";
-
-// wip
-const currentUsername = "user";
 
 export function CollectionCard({
   collection, notes, onNoteRemoved, onCollectionUpdated, onCollectionDeleted
 }) {
+  const { currentUser } = useAuth();
+  const currentUsername = currentUser?.username;
+
   const isOwner = collection.username === currentUsername;
 
   const [showCollectionModal, setShowCollectionModal] = useState(false);

@@ -1,11 +1,15 @@
 import { fetchJson } from "../services/fetch";
 import { formatDateTime } from "../utils/date";
+import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 function NoteFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const { currentUser } = useAuth();
+  const currentUsername = currentUser?.username;
 
   const isEditMode = Boolean(id);
   const [categories, setCategories] = useState([]);
@@ -19,9 +23,6 @@ function NoteFormPage() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-
-  // wip
-  const currentUsername = "user";
 
   useEffect(() => {
     async function loadData() {

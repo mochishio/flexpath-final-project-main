@@ -3,12 +3,13 @@ import { CategoryForm } from "../category/CategoryForm";
 import { CollectionForm } from "../collection/CollectionForm";
 import { fetchJson } from "../../services/fetch";
 import { formatDateTime } from "../../utils/date";
+import { useAuth } from "../../context/AuthContext";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export function AdminTable({sectionName, columns}) {
-  // wip
-  const currentUsername = "user";
+  const { currentUser } = useAuth();
+  const currentUsername = currentUser?.username;
 
   const navigate = useNavigate();
 

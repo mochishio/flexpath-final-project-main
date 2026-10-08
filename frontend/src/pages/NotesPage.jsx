@@ -1,14 +1,15 @@
 import { addVisibilityIcon } from "../utils/formatText";
 import { fetchJson } from "../services/fetch";
 import { formatDateTime } from "../utils/date";
+import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 
-// wip
-const currentUsername = "user";
-
 function NotesPage() {
+  const { currentUser } = useAuth();
+  const currentUsername = currentUser?.username;
+
   const location = useLocation();
   const isPublicMode = location.pathname === "/public";
 

@@ -1,11 +1,12 @@
 import { CollectionCard } from "../components/collection/CollectionCard"
 import { fetchJson } from "../services/fetch";
+import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 
-// wip
-const currentUsername = "user";
-
 function CollectionsPage() {
+  const { currentUser } = useAuth();
+  const currentUsername = currentUser?.username;
+
   const [myCollections, setMyCollections] = useState([]);
   const [publicCollections, setPublicCollections] = useState([]);
 
