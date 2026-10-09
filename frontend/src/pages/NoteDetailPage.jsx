@@ -64,7 +64,7 @@ function NoteDetailPage() {
         `http://localhost:8080/api/notes/${id}`,
         { method: "DELETE", }
       );
-      navigate("/");
+      navigate("/private");
     } catch (error) {
       setError(error.message);
     }

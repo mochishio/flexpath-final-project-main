@@ -17,10 +17,10 @@ function App() {
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
         <div className="container-fluid">
           <div className="d-flex align-items-center">
-            <NavLink className="navbar-brand ms-4 nav-link" to="/">Study Notes</NavLink>
+            <NavLink className="navbar-brand ms-4 nav-link" to="/private">Study Notes</NavLink>
             <ul className="navbar-nav">
               <li className="nav-item">
-                <NavLink className="nav-link pe-0" to="/">My Notes</NavLink>
+                <NavLink className="nav-link pe-0" to="/private">My Notes</NavLink>
               </li>
               <li className="nav-item">
                 <NavLink className="nav-link pe-0" to="/public">Public Notes</NavLink>
@@ -38,8 +38,8 @@ function App() {
       <hr />
 
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<NotesPage />} />
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/private" element={<NotesPage />} />
         <Route path="/public" element={<NotesPage />} />
 
         <Route path="/notes/new" element={<NoteFormPage />} />

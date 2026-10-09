@@ -33,7 +33,7 @@ export default function LoginPage() {
       const accessToken = data.accessToken.token;
       localStorage.setItem("accessToken", accessToken);
 
-      navigate("/");
+      navigate("/private");
 
     } catch (error) {
       setError("Invalid username or password.");
