@@ -1,9 +1,11 @@
 import { fetchJson } from "../services/fetch";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { setCurrentUser, setCurrentUserRoles } = useAuth();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -32,6 +34,11 @@ export default function LoginPage() {
 
       const accessToken = data.accessToken.token;
       localStorage.setItem("accessToken", accessToken);
+
+      const user = await fetchJson("http://localhost:8080/api/profile");
+      const roles = await fetchJson("http://localhost:8080/api/profile/roles");
+      setCurrentUser(user);
+      setCurrentUserRoles(roles);
 
       navigate("/private");
 

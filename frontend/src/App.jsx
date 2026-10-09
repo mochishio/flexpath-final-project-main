@@ -1,4 +1,5 @@
 import { NavLink, Route, Routes } from "react-router-dom";
+import { useAuth } from "../src/context/AuthContext"
 
 import LoginPage from "./pages/LoginPage";
 import NotesPage from "./pages/NotesPage";
@@ -11,6 +12,8 @@ import PageNotFound from "./components/404";
 import ServerError from "./components/500";
 
 function App() {
+  const { currentUserRoles } = useAuth();
+  const isAdmin = currentUserRoles.includes("ADMIN");
 
   return (
     <>
@@ -31,7 +34,9 @@ function App() {
             </ul>
           </div>
 
-          <NavLink className="nav-link text-light me-4"to="/admin" title="Admin">🛠️ Admin</NavLink>
+          {isAdmin &&
+            <NavLink className="nav-link text-light me-4"to="/admin" title="Admin">🛠️ Admin</NavLink>
+          }
 
         </div>
       </nav>
