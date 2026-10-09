@@ -12,6 +12,7 @@ import PageNotFound from "./components/404";
 import ServerError from "./components/500";
 
 function App() {
+  const { currentUser } = useAuth();
   const { currentUserRoles } = useAuth();
   const isAdmin = currentUserRoles.includes("ADMIN");
 
@@ -33,6 +34,10 @@ function App() {
               </li>
             </ul>
           </div>
+
+          {!currentUser &&
+            <NavLink className="nav-link text-light me-4"to="/" title="Login">Login</NavLink>
+          }
 
           {isAdmin &&
             <NavLink className="nav-link text-light me-4"to="/admin" title="Admin">🛠️ Admin</NavLink>
