@@ -65,6 +65,8 @@ create table collection_notes (
 -- admin user
 insert into users (username, password) values ('admin', '$2a$10$tBTfzHzjmQVKza3VSa5lsOX6/iL93xPVLlLXYg2FhT6a.jb1o6VDq');
 insert into roles (username, role) values ('admin', 'ADMIN');
+insert into users (username, password) values ('admin2', '$2a$10$zmHsli18qX3i4RoDMwGbPeAPS7zYx/iE9q2kIafxpn2biAMnx0lCW');
+insert into roles (username, role) values ('admin2', 'ADMIN');
 insert into categories (name) values ('CSS');
 insert into categories (name) values ('HTML');
 insert into categories (name) values ('Java');
@@ -77,7 +79,7 @@ insert into categories (name) values ('Spring Boot');
 -- users
 insert into users (username, password) values ('user', '$2a$10$tBTfzHzjmQVKza3VSa5lsOX6/iL93xPVLlLXYg2FhT6a.jb1o6VDq');
 insert into roles (username, role) values ('user', 'USER');
-insert into users (username, password) values ('user2', '$2a$10$tBTfzHzjmQVKza3VSa5lsOX6/iL93xPVLlLXYg2FhT6a.jb1o6VDq');
+insert into users (username, password) values ('user2', '$2a$10$P3M6cTgjgl/4Dksy7RoYD.IqsU3P67XxtViD6.gLrdvO9KI1w1YMu');
 insert into roles (username, role) values ('user2', 'USER');
 -- public/private notes by regular user
 insert into notes
