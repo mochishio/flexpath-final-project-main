@@ -24,17 +24,18 @@ function CollectionsPage() {
 
   // Load Collections
   useEffect(() => {
-    // wait until the current user is loaded
-    if (!currentUsername) { return; }
-
     async function loadCollections() {
       try {
         setError("");
 
         // get collections
-        const myData = await fetchJson(
-          `http://localhost:8080/api/collections/user/${currentUsername}`
-        );
+        let myData = [];
+        if (currentUsername) {
+          // wait until the current user is loaded
+          myData = await fetchJson(
+            `http://localhost:8080/api/collections/user/${currentUsername}`
+          );
+        }
         const publicData = await fetchJson(
           "http://localhost:8080/api/collections/public",
         );
@@ -340,7 +341,7 @@ function CollectionsPage() {
 
           {displayedMyCollections.length === 0 && (
             <div className="alert alert-secondary">
-              No notes found.
+              No collections found.
             </div>
           )}
         </div>
