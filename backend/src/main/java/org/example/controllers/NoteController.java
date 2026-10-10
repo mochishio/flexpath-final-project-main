@@ -4,6 +4,7 @@ import org.example.models.Collection;
 import org.example.models.Note;
 import org.example.services.NoteService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,11 +42,13 @@ public class NoteController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public Note create(@RequestBody Note note) {
         return noteService.create(note);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public Note update(
             @PathVariable int id,
             @RequestBody Note note) {
@@ -54,6 +57,7 @@ public class NoteController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public int delete(@PathVariable int id) {
         return noteService.delete(id);
     }

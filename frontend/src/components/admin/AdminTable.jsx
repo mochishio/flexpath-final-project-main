@@ -3,6 +3,7 @@ import { CategoryForm } from "../category/CategoryForm";
 import { CollectionForm } from "../collection/CollectionForm";
 import { fetchJson } from "../../services/fetch";
 import { formatDateTime } from "../../utils/date";
+import { handleApiError } from "../../services/handleApiError";
 import { useAuth } from "../../context/AuthContext";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -148,7 +149,7 @@ export function AdminTable({sectionName, columns}) {
       setCollection(null);
       setShowCollectionModal(false);
     } catch (error) {
-      setError(error.message);
+      handleApiError(error, navigate, setError);
     }
   }
 
@@ -191,25 +192,7 @@ export function AdminTable({sectionName, columns}) {
       setCategory(null);
       setShowCategoryModal(false);
     } catch (error) {
-      if (error.status === 401) {
-        setError("Please log in to continue.");
-        return;
-      }
-
-      if (error.status === 403) {
-        if (sectionName === "categories") {
-          setError("Only admins can perform this action.");
-        } else {
-          setError("Only the owner or an admin can perform this action.");
-        }
-        return;
-      }
-
-      if (error.status === 409) {
-        setError("A category with this name already exists.");
-        return;
-      }
-      setError(error.message);
+      handleApiError(error, navigate, setError);
     }
   }
 
@@ -236,7 +219,7 @@ export function AdminTable({sectionName, columns}) {
       setSelectedRecordIds([]);
 
     } catch (error) {
-      setError(error.message);
+      handleApiError(error, navigate, setError);
     }
   }
 

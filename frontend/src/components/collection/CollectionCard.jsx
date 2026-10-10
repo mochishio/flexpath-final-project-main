@@ -1,6 +1,7 @@
 import { addVisibilityIcon } from "../../utils/formatText";
 import { CollectionForm } from "../collection/CollectionForm";
 import { fetchJson } from "../../services/fetch";
+import { handleApiError } from "../../services/handleApiError";
 import { Link } from "react-router-dom";
 import { formatDateTime } from "../../utils/date";
 import { useAuth } from "../../context/AuthContext";
@@ -33,7 +34,7 @@ export function CollectionCard({
 
       onNoteRemoved(collection.id, noteId);
     } catch (error) {
-      setError(error.message);
+      handleApiError(error, navigate, setError);
     }
   }
 
@@ -58,7 +59,7 @@ export function CollectionCard({
       onCollectionUpdated(updatedCollection);
       setShowCollectionModal(false);
     } catch (error) {
-      setError(error.message);
+      handleApiError(error, navigate, setError);
     }
   }
 
@@ -79,7 +80,7 @@ export function CollectionCard({
       onCollectionDeleted(collection.id);
       setShowCollectionModal(false);
     } catch (error) {
-      setError(error.message);
+      handleApiError(error, navigate, setError);
     }
   }
 

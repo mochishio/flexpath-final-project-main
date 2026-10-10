@@ -41,7 +41,6 @@ function NoteDetailPage() {
         }
       } catch (error) {
         handleApiError(error, navigate, setError);
-        setError(error.message);
       } finally {
         setLoading(false);
       }
@@ -66,7 +65,7 @@ function NoteDetailPage() {
       );
       navigate("/private");
     } catch (error) {
-      setError(error.message);
+      handleApiError(error, navigate, setError);
     }
   }
 
@@ -93,7 +92,7 @@ function NoteDetailPage() {
       setShowCollectionModal(true);
 
     } catch (error) {
-      setError(error.message);
+      handleApiError(error, navigate, setError);
     }
   }
 
@@ -141,7 +140,7 @@ function NoteDetailPage() {
       setShowCollectionModal(false);
 
     } catch (error) {
-      setError(error.message);
+      handleApiError(error, navigate, setError);
     }
   }
 
@@ -184,7 +183,7 @@ function NoteDetailPage() {
 
       handleReturnToAddToCollectionModal();
     } catch (error) {
-      setError(error.message);
+      handleApiError(error, navigate, setError);
     }
   }
 

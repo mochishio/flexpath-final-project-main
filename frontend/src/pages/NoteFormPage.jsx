@@ -1,5 +1,6 @@
 import { fetchJson } from "../services/fetch";
 import { formatDateTime } from "../utils/date";
+import { handleApiError } from "../services/handleApiError";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -88,7 +89,7 @@ function NoteFormPage() {
       navigate(`/notes/${savedNote.id}`);
 
     } catch (error) {
-      setError(error.message);
+      handleApiError(error, navigate, setError);
     }
   }
 
