@@ -28,11 +28,22 @@ export function AuthContextProvider({children}) {
     loadCurrentUser();
   }, []);
 
+  function logout() {
+    localStorage.removeItem("accessToken");
+    setCurrentUser(null);
+    setCurrentUserRoles([]);
+  }
+
   return (
     <AuthContext.Provider
       value={{
-        currentUser, setCurrentUser, currentUserRoles, setCurrentUserRoles, loading}
-      }>
+        currentUser,
+        setCurrentUser,
+        currentUserRoles,
+        setCurrentUserRoles,
+        loading,
+        logout
+      }}>
         {children}
       </AuthContext.Provider>
   )

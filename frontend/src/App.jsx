@@ -1,5 +1,6 @@
 import { NavLink, Route, Routes } from "react-router-dom";
 import { useAuth } from "../src/context/AuthContext"
+import { useNavigate } from "react-router-dom";
 
 import LoginPage from "./pages/LoginPage";
 import NotesPage from "./pages/NotesPage";
@@ -12,9 +13,15 @@ import PageNotFound from "./components/404";
 import ServerError from "./components/500";
 
 function App() {
-  const { currentUser } = useAuth();
-  const { currentUserRoles } = useAuth();
+  const { currentUser, currentUserRoles, logout } = useAuth();
   const isAdmin = currentUserRoles.includes("ADMIN");
+
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    logout();
+    navigate("/");
+  }
 
   return (
     <>
@@ -35,13 +42,35 @@ function App() {
             </ul>
           </div>
 
-          {!currentUser &&
-            <NavLink className="nav-link text-light me-4"to="/" title="Login">Login</NavLink>
-          }
+          {currentUser ? (
+            <div className="d-flex align-items-center">
+              <ul className="navbar-nav">
 
-          {isAdmin &&
-            <NavLink className="nav-link text-light me-4"to="/admin" title="Admin">🛠️ Admin</NavLink>
-          }
+                {isAdmin && (
+                  <li className="nav-item">
+                    <NavLink className="nav-link pe-0 text-light" to="/admin">
+                      🛠️ Admin
+                    </NavLink>
+                  </li>
+                )}
+
+                <li className="nav-item">
+                  <button
+                    type="button"
+                    className="nav-link text-light me-4"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </button>
+                </li>
+
+              </ul>
+            </div>
+          ) : (
+            <NavLink className="nav-link text-light me-4" to="/">
+              Login
+            </NavLink>
+          )}
 
         </div>
       </nav>
