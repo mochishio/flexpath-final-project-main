@@ -3,6 +3,7 @@ package org.example.controllers;
 import org.example.models.Category;
 import org.example.services.CategoryService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,11 +31,13 @@ public class CategoryController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Category create(@RequestBody Category category) {
         return categoryService.create(category);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Category update(
             @PathVariable int id,
             @RequestBody Category category) {
@@ -43,6 +46,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public int delete(@PathVariable int id) {
         return categoryService.delete(id);
     }

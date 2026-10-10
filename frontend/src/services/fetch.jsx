@@ -20,18 +20,18 @@ export async function fetchJson(url, options = {}) {
 
 
     if (!response.ok) {
-      let errorBody;
-
+      const errorText = await response.text();
+      let errorBody = errorText;
       try {
-        errorBody = await response.json();
+        errorBody = JSON.parse(errorText);
       } catch {
-        errorBody = await response.text();
+        // Keep the original text
       }
-
       const error = new Error(
         `HTTP ${response.status} ${response.statusText}\n${JSON.stringify(errorBody)}`
       );
       error.status = response.status;
+      error.body = errorBody;
       throw error;
     }
 

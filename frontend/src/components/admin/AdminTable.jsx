@@ -191,6 +191,20 @@ export function AdminTable({sectionName, columns}) {
       setCategory(null);
       setShowCategoryModal(false);
     } catch (error) {
+      if (error.status === 401) {
+        setError("Please log in to continue.");
+        return;
+      }
+
+      if (error.status === 403) {
+        if (sectionName === "categories") {
+          setError("Only admins can perform this action.");
+        } else {
+          setError("Only the owner or an admin can perform this action.");
+        }
+        return;
+      }
+
       if (error.status === 409) {
         setError("A category with this name already exists.");
         return;
