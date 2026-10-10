@@ -1,4 +1,6 @@
 import { capitalize } from "../utils/formatText";
+import { useAuth } from "../context/AuthContext";
+import { Navigate } from "react-router-dom";
 import { useState } from "react";
 import AdminTable from "../components/admin/AdminTable";
 
@@ -36,6 +38,17 @@ const SECTIONS = {
 function AdminPage() {
   const [section, setSection] = useState(Object.keys(SECTIONS)[0]);
   const sectionConfig = SECTIONS[section];
+
+  const { currentUserRoles, loading } = useAuth();
+  const isAdmin = currentUserRoles.includes("ADMIN");
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/404" replace />;
+  }
 
   return (
     <main className="container mt-4">
