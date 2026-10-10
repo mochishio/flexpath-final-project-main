@@ -72,6 +72,12 @@ public class CategoryService {
         // Check whether the category exists.
         getById(id);
 
+        if (categoryDao.getByName(category.getName()).isPresent()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Category already exists");
+
+        }
         return categoryDao.update(id, category);
     }
 
