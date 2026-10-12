@@ -3,6 +3,7 @@ package org.example.controllers;
 import org.example.models.Collection;
 import org.example.models.Note;
 import org.example.services.CollectionService;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -51,15 +52,18 @@ public class CollectionController {
     @PreAuthorize("isAuthenticated()")
     public Collection update(
             @PathVariable int id,
-            @RequestBody Collection collection) {
+            @RequestBody Collection collection,
+            Authentication authentication) {
 
-        return collectionService.update(id, collection);
+        return collectionService.update(id, collection, authentication);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public int delete(@PathVariable int id) {
-        return collectionService.delete(id);
+    public int delete(
+            @PathVariable int id,
+            Authentication authentication) {
+        return collectionService.delete(id, authentication);
     }
 
     // ======================
@@ -75,13 +79,21 @@ public class CollectionController {
     @PreAuthorize("isAuthenticated()")
     public List<Note> addNoteToCollection(
             @PathVariable int collectionId,
-            @PathVariable int noteId) {
-        return collectionService.addNoteToCollection(collectionId, noteId);
+            @PathVariable int noteId,
+            Authentication authentication) {
+        return collectionService.addNoteToCollection(
+                collectionId, noteId, authentication);
     }
 
     @DeleteMapping("{collectionId}/notes/{noteId}")
     @PreAuthorize("isAuthenticated()")
-    public int removeNoteFromCollection(@PathVariable int collectionId, @PathVariable int noteId) {
-        return collectionService.removeNoteFromCollection(collectionId, noteId);
+    public int removeNoteFromCollection(
+            @PathVariable int collectionId,
+            @PathVariable int noteId,
+            Authentication authentication) {
+        return collectionService.removeNoteFromCollection(
+                collectionId,
+                noteId,
+                authentication);
     }
 }

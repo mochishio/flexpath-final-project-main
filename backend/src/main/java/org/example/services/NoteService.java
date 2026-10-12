@@ -4,6 +4,7 @@ import org.example.models.Collection;
 import org.example.daos.NoteDao;
 import org.example.models.Note;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -13,6 +14,7 @@ import java.util.List;
 public class NoteService {
 
     private final NoteDao noteDao;
+    private final AuthorizationService authorizationService;
 
     private void validateTitle(Note note) {
         if (note.getTitle() == null || note.getTitle().isBlank()) {
@@ -43,8 +45,11 @@ public class NoteService {
         }
     }
 
-    public NoteService(NoteDao noteDao) {
+    public NoteService(
+            NoteDao noteDao,
+            AuthorizationService authorizationService) {
         this.noteDao = noteDao;
+        this.authorizationService = authorizationService;
     }
 
     /**
@@ -108,10 +113,13 @@ public class NoteService {
      * @param note The new note information.
      * @return The updated note.
      */
-    public Note update(int id, Note note) {
+    public Note update(int id, Note note, Authentication authentication) {
         getById(id);
         validateTitle(note);
         validateContent(note);
+        authorizationService.checkOwnerOrAdmin(
+                note.getUsername(),
+                authentication);
         return noteDao.update(id, note);
     }
 
@@ -121,7 +129,12 @@ public class NoteService {
      * @param id The id of the note.
      * @return The number of deleted rows.
      */
-    public int delete(int id) {
+    public int delete(int id, Authentication authentication) {
+        Note note = getById(id);
+        authorizationService.checkOwnerOrAdmin(
+                note.getUsername(),
+                authentication);
+
         int rows = noteDao.delete(id);
 
         if (rows == 0) {

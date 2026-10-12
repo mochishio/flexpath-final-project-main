@@ -3,6 +3,7 @@ package org.example.controllers;
 import org.example.models.Collection;
 import org.example.models.Note;
 import org.example.services.NoteService;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -51,14 +52,16 @@ public class NoteController {
     @PreAuthorize("isAuthenticated()")
     public Note update(
             @PathVariable int id,
-            @RequestBody Note note) {
-
-        return noteService.update(id, note);
+            @RequestBody Note note,
+            Authentication authentication) {
+        return noteService.update(id, note, authentication);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public int delete(@PathVariable int id) {
-        return noteService.delete(id);
+    public int delete(
+            @PathVariable int id,
+            Authentication authentication) {
+        return noteService.delete(id, authentication);
     }
 }

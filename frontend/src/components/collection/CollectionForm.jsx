@@ -11,6 +11,7 @@ export function CollectionForm({
   const [name, setName] = useState("");
   const [isPublic, setIsPublic] = useState(false);
   const [description, setDescription] = useState("");
+  const [username, setUsername] = useState(false);
 
   const isEditMode = collection != null;
 
@@ -24,11 +25,13 @@ export function CollectionForm({
       setName(collection.name);
       setIsPublic(collection.isPublic);
       setDescription(collection.description ?? "");
+      setUsername(collection.username ?? "");
     } else {
       // Create
       setName("");
       setIsPublic(false);
       setDescription("");
+      setUsername("");
     }
   }, [show, collection, isEditMode]);
 
@@ -39,6 +42,7 @@ export function CollectionForm({
       name: name,
       description: description,
       isPublic: isPublic,
+      username: username,
     };
 
     onSave(collectionData);

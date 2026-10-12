@@ -5,6 +5,7 @@ import org.example.daos.NoteDao;
 import org.example.models.Collection;
 import org.example.models.Note;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,10 +16,15 @@ public class CollectionService {
 
     private final CollectionDao collectionDao;
     private final NoteDao noteDao;
+    private final AuthorizationService authorizationService;
 
-    public CollectionService(CollectionDao collectionDao, NoteDao noteDao) {
+    public CollectionService(
+            CollectionDao collectionDao,
+            NoteDao noteDao,
+            AuthorizationService authorizationService) {
         this.collectionDao = collectionDao;
         this.noteDao = noteDao;
+        this.authorizationService = authorizationService;
     }
 
     private void validateName(Collection collection) {
@@ -97,9 +103,15 @@ public class CollectionService {
      * @param collection The new collection information.
      * @return The updated collection.
      */
-    public Collection update(int id, Collection collection) {
+    public Collection update(
+            int id,
+            Collection collection,
+            Authentication authentication) {
         getById(id);
         validateName(collection);
+        authorizationService.checkOwnerOrAdmin(
+                collection.getUsername(),
+                authentication);
         return collectionDao.update(id, collection);
     }
 
@@ -109,7 +121,12 @@ public class CollectionService {
      * @param id The id of the collection.
      * @return The number of deleted rows.
      */
-    public int delete(int id) {
+    public int delete(int id, Authentication authentication) {
+        Collection collection = getById(id);
+        authorizationService.checkOwnerOrAdmin(
+                collection.getUsername(),
+                authentication);
+
         int rows = collectionDao.delete(id);
 
         if (rows == 0) {
@@ -141,9 +158,15 @@ public class CollectionService {
      * @param noteId       The note id.
      * @return A list of notes inside the collection.
      */
-    public List<Note> addNoteToCollection(int collectionId, int noteId) {
+    public List<Note> addNoteToCollection(
+            int collectionId,
+            int noteId,
+            Authentication authentication) {
         // Collection existence check
-        getById(collectionId);
+        Collection collection = getById(collectionId);
+        authorizationService.checkOwnerOrAdmin(
+                collection.getUsername(),
+                authentication);
 
         // Note existence check
         noteDao.getById(noteId)
@@ -162,12 +185,20 @@ public class CollectionService {
     /**
      * Removes a note from a collection.
      *
-     * @param collection_id The collection id.
-     * @param noteId        The note id.
+     * @param collectionId The collection id.
+     * @param noteId       The note id.
      * @return The number of deleted rows.
      */
-    public int removeNoteFromCollection(int collectionId, int noteId) {
-        getById(collectionId);
+    public int removeNoteFromCollection(
+            int collectionId,
+            int noteId,
+            Authentication authentication) {
+
+        Collection collection = getById(collectionId);
+        authorizationService.checkOwnerOrAdmin(
+                collection.getUsername(),
+                authentication);
+
         int rows = collectionDao.removeNoteFromCollection(
                 collectionId,
                 noteId);
