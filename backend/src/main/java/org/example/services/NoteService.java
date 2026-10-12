@@ -114,11 +114,11 @@ public class NoteService {
      * @return The updated note.
      */
     public Note update(int id, Note note, Authentication authentication) {
-        getById(id);
+        Note existingNote = getById(id);
         validateTitle(note);
         validateContent(note);
         authorizationService.checkOwnerOrAdmin(
-                note.getUsername(),
+                existingNote.getUsername(),
                 authentication);
         return noteDao.update(id, note);
     }

@@ -107,11 +107,11 @@ public class CollectionService {
             int id,
             Collection collection,
             Authentication authentication) {
-        getById(id);
-        validateName(collection);
+        Collection existingCollection = getById(id);
         authorizationService.checkOwnerOrAdmin(
-                collection.getUsername(),
+                existingCollection.getUsername(),
                 authentication);
+        validateName(collection);
         return collectionDao.update(id, collection);
     }
 

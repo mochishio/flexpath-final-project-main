@@ -15,11 +15,13 @@ import org.example.daos.CollectionDao;
 import org.example.daos.NoteDao;
 import org.example.models.Collection;
 import org.example.models.Note;
+import org.example.services.AuthorizationService;
 import org.example.services.CollectionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.server.ResponseStatusException;
 
 class CollectionServiceTest {
@@ -31,6 +33,8 @@ class CollectionServiceTest {
     private String NOTE_TITLE = "Create Database";
     private Collection collection;
     private Note note;
+    private Authentication authentication;
+    private AuthorizationService authorizationService;
 
     @BeforeEach
     void setUp() {
@@ -51,7 +55,13 @@ class CollectionServiceTest {
 
         collectionDao = Mockito.mock(CollectionDao.class);
         noteDao = Mockito.mock(NoteDao.class);
-        collectionService = new CollectionService(collectionDao, noteDao);
+        authentication = Mockito.mock(Authentication.class);
+        authorizationService = Mockito.mock(AuthorizationService.class);
+
+        collectionService = new CollectionService(
+                collectionDao,
+                noteDao,
+                authorizationService);
     }
 
     @Test
@@ -222,8 +232,9 @@ class CollectionServiceTest {
 
         when(collectionDao.getById(1)).thenReturn(Optional.of(collection));
         when(collectionDao.update(1, updatedCollection)).thenReturn(updatedCollection);
+        when(authentication.getName()).thenReturn("admin");
 
-        Collection result = collectionService.update(1, updatedCollection);
+        Collection result = collectionService.update(1, updatedCollection, authentication);
         assertEquals(1, result.getId());
         assertEquals("My Best 2026", result.getName());
         assertEquals("description", result.getDescription());
@@ -240,10 +251,11 @@ class CollectionServiceTest {
         updatedCollection.setName("My Best 2026");
 
         when(collectionDao.getById(100)).thenReturn(Optional.empty());
+        when(authentication.getName()).thenReturn("user");
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
-                () -> collectionService.update(100, updatedCollection));
+                () -> collectionService.update(100, updatedCollection, authentication));
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         verify(collectionDao).getById(100);
         verify(collectionDao, never()).update(100, updatedCollection);
@@ -252,6 +264,7 @@ class CollectionServiceTest {
     @Test
     void update_shouldThrowBadRequest_whenNameIsBlank() {
         when(collectionDao.getById(1)).thenReturn(Optional.of(collection));
+        when(authentication.getName()).thenReturn("user");
 
         Collection updatedEmptyNameCollection = new Collection();
         updatedEmptyNameCollection.setId(1);
@@ -262,7 +275,7 @@ class CollectionServiceTest {
 
         ResponseStatusException result = assertThrows(
                 ResponseStatusException.class,
-                () -> collectionService.update(1, updatedEmptyNameCollection));
+                () -> collectionService.update(1, updatedEmptyNameCollection, authentication));
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
 
         verify(collectionDao).getById(1);
@@ -271,22 +284,27 @@ class CollectionServiceTest {
 
     @Test
     void delete_shouldReturnDeletedRowCount_whenCollectionExists() {
+        when(collectionDao.getById(1)).thenReturn(Optional.of(collection));
         when(collectionDao.delete(1)).thenReturn(1);
+        when(authentication.getName()).thenReturn("user");
 
-        int deletedCount = collectionService.delete(1);
+        int deletedCount = collectionService.delete(1, authentication);
         assertEquals(1, deletedCount);
         verify(collectionDao).delete(1);
     }
 
     @Test
     void delete_shouldThrowNotFound_whenCollectionDoesNotExist() {
+        when(collectionDao.getById(100)).thenReturn(Optional.empty());
         when(collectionDao.delete(100)).thenReturn(0);
+        when(authentication.getName()).thenReturn("user");
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
-                () -> collectionService.delete(100));
+                () -> collectionService.delete(100, authentication));
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        verify(collectionDao).delete(100);
+        verify(collectionDao).getById(100);
+        verify(collectionDao, never()).delete(100);
     }
 
     // ======================
@@ -359,8 +377,12 @@ class CollectionServiceTest {
         when(collectionDao.addNoteToCollection(
                 collection.getId(),
                 note.getId())).thenReturn(List.of(note, existingNote));
+        when(authentication.getName()).thenReturn("user");
 
-        List<Note> result = collectionService.addNoteToCollection(collection.getId(), note.getId());
+        List<Note> result = collectionService.addNoteToCollection(
+                collection.getId(),
+                note.getId(),
+                authentication);
         assertEquals(2, result.size());
         // 1
         assertEquals(1, result.get(0).getId());
@@ -395,12 +417,14 @@ class CollectionServiceTest {
                 collection.getId(),
                 note.getId()))
                 .thenReturn(true);
+        when(authentication.getName()).thenReturn("user");
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
                 () -> collectionService.addNoteToCollection(
                         collection.getId(),
-                        note.getId()));
+                        note.getId(),
+                        authentication));
 
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
         verify(collectionDao, never())
@@ -416,12 +440,14 @@ class CollectionServiceTest {
                 ResponseStatusException.class,
                 () -> collectionService.addNoteToCollection(
                         100,
-                        note.getId()));
+                        note.getId(),
+                        authentication));
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         verify(collectionDao).getById(100);
         verify(collectionDao, never())
                 .addNoteToCollection(100, note.getId());
+        when(authentication.getName()).thenReturn("user");
     }
 
     @Test
@@ -430,11 +456,12 @@ class CollectionServiceTest {
                 .thenReturn(Optional.of(collection));
         when(noteDao.getById(100))
                 .thenReturn(Optional.empty());
+        when(authentication.getName()).thenReturn("user");
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
                 () -> collectionService.addNoteToCollection(
-                        collection.getId(), 100));
+                        collection.getId(), 100, authentication));
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         verify(collectionDao).getById(collection.getId());
@@ -451,10 +478,12 @@ class CollectionServiceTest {
                 collection.getId(),
                 note.getId()))
                 .thenReturn(1);
+        when(authentication.getName()).thenReturn("user");
 
         int result = collectionService.removeNoteFromCollection(
                 collection.getId(),
-                note.getId());
+                note.getId(),
+                authentication);
 
         assertEquals(1, result);
         verify(collectionDao).getById(collection.getId());
@@ -465,14 +494,15 @@ class CollectionServiceTest {
 
     @Test
     void removeNoteFromCollection_shouldThrowNotFound_whenCollectionDoesNotExist() {
-        when(collectionDao.getById(100))
-                .thenReturn(Optional.empty());
+        when(collectionDao.getById(100)).thenReturn(Optional.empty());
+        when(authentication.getName()).thenReturn("user");
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
                 () -> collectionService.removeNoteFromCollection(
                         100,
-                        note.getId()));
+                        note.getId(),
+                        authentication));
 
         assertEquals(
                 HttpStatus.NOT_FOUND,
@@ -490,11 +520,12 @@ class CollectionServiceTest {
                 collection.getId(),
                 100))
                 .thenReturn(0);
+        when(authentication.getName()).thenReturn("user");
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
                 () -> collectionService.removeNoteFromCollection(
-                        collection.getId(), 100));
+                        collection.getId(), 100, authentication));
 
         assertEquals(
                 HttpStatus.NOT_FOUND,

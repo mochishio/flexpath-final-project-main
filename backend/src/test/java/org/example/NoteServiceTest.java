@@ -14,17 +14,21 @@ import java.util.Optional;
 import org.example.daos.NoteDao;
 import org.example.models.Collection;
 import org.example.models.Note;
+import org.example.services.AuthorizationService;
 import org.example.services.NoteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.server.ResponseStatusException;
 
 class NoteServiceTest {
 
     private NoteDao noteDao;
     private NoteService noteService;
+    private Authentication authentication;
+    private AuthorizationService authorizationService;
     private String NOTE_TITLE = "Create Database";
     private Note note;
 
@@ -39,7 +43,10 @@ class NoteServiceTest {
         note.setCategoryId(1);
 
         noteDao = Mockito.mock(NoteDao.class);
-        noteService = new NoteService(noteDao);
+        authentication = Mockito.mock(Authentication.class);
+        authorizationService = Mockito.mock(AuthorizationService.class);
+
+        noteService = new NoteService(noteDao, authorizationService);
     }
 
     @Test
@@ -270,8 +277,9 @@ class NoteServiceTest {
 
         when(noteDao.getById(1)).thenReturn(Optional.of(note));
         when(noteDao.update(1, updatedNote)).thenReturn(updatedNote);
+        when(authentication.getName()).thenReturn("admin");
 
-        Note result = noteService.update(1, updatedNote);
+        Note result = noteService.update(1, updatedNote, authentication);
         assertEquals(1, result.getId());
         assertEquals("React Router", result.getTitle());
         assertEquals("content", result.getContent());
@@ -289,10 +297,11 @@ class NoteServiceTest {
         updatedNote.setTitle("React Router");
 
         when(noteDao.getById(100)).thenReturn(Optional.empty());
+        when(authentication.getName()).thenReturn("user");
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
-                () -> noteService.update(100, updatedNote));
+                () -> noteService.update(100, updatedNote, authentication));
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         verify(noteDao).getById(100);
         verify(noteDao, never()).update(100, updatedNote);
@@ -301,6 +310,7 @@ class NoteServiceTest {
     @Test
     void update_shouldThrowBadRequest_whenTitleIsBlank() {
         when(noteDao.getById(1)).thenReturn(Optional.of(note));
+        when(authentication.getName()).thenReturn("user");
 
         Note updatedEmptyNameNote = new Note();
         updatedEmptyNameNote.setId(1);
@@ -312,7 +322,7 @@ class NoteServiceTest {
 
         ResponseStatusException result = assertThrows(
                 ResponseStatusException.class,
-                () -> noteService.update(1, updatedEmptyNameNote));
+                () -> noteService.update(1, updatedEmptyNameNote, authentication));
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
 
         verify(noteDao).getById(1);
@@ -321,9 +331,11 @@ class NoteServiceTest {
 
     @Test
     void delete_shouldReturnDeletedRowCount_whenNoteExists() {
+        when(noteDao.getById(1)).thenReturn(Optional.of(note));
         when(noteDao.delete(1)).thenReturn(1);
+        when(authentication.getName()).thenReturn("user");
 
-        int deletedCount = noteService.delete(1);
+        int deletedCount = noteService.delete(1, authentication);
         assertEquals(1, deletedCount);
         verify(noteDao).delete(1);
     }
@@ -331,11 +343,12 @@ class NoteServiceTest {
     @Test
     void delete_shouldThrowNotFound_whenNoteDoesNotExist() {
         when(noteDao.delete(100)).thenReturn(0);
+        when(authentication.getName()).thenReturn("user");
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
-                () -> noteService.delete(100));
+                () -> noteService.delete(100, authentication));
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        verify(noteDao).delete(100);
+        verify(noteDao, never()).delete(100);
     }
 }
