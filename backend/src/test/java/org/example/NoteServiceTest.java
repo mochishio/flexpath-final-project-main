@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.server.ResponseStatusException;
 
 class NoteServiceTest {
@@ -44,8 +46,8 @@ class NoteServiceTest {
 
         noteDao = Mockito.mock(NoteDao.class);
         authentication = Mockito.mock(Authentication.class);
-        authorizationService = Mockito.mock(AuthorizationService.class);
 
+        authorizationService = new AuthorizationService();
         noteService = new NoteService(noteDao, authorizationService);
     }
 
@@ -272,19 +274,19 @@ class NoteServiceTest {
         updatedNote.setTitle("React Router");
         updatedNote.setContent("content");
         updatedNote.setIsPublic(false);
-        updatedNote.setUsername("admin");
+        updatedNote.setUsername("user");
         updatedNote.setCategoryId(1);
 
         when(noteDao.getById(1)).thenReturn(Optional.of(note));
         when(noteDao.update(1, updatedNote)).thenReturn(updatedNote);
-        when(authentication.getName()).thenReturn("admin");
+        when(authentication.getName()).thenReturn("user");
 
         Note result = noteService.update(1, updatedNote, authentication);
         assertEquals(1, result.getId());
         assertEquals("React Router", result.getTitle());
         assertEquals("content", result.getContent());
         assertFalse(result.getIsPublic());
-        assertEquals("admin", result.getUsername());
+        assertEquals("user", result.getUsername());
         assertEquals(1, result.getCategoryId());
 
         verify(noteDao).getById(1);
@@ -330,6 +332,62 @@ class NoteServiceTest {
     }
 
     @Test
+    void update_shouldReturnUpdatedNote_whenUserIsAdmin() {
+        Note updatedNote = new Note();
+        updatedNote.setId(1);
+        updatedNote.setTitle("React Router");
+        updatedNote.setContent("content");
+        updatedNote.setIsPublic(false);
+        updatedNote.setUsername("user");
+        updatedNote.setCategoryId(1);
+
+        when(noteDao.getById(1)).thenReturn(Optional.of(note));
+        when(noteDao.update(1, updatedNote)).thenReturn(updatedNote);
+        when(authentication.getName()).thenReturn("admin");
+        when(authentication.getAuthorities())
+                .thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("ADMIN")));
+
+        Note result = noteService.update(1, updatedNote, authentication);
+        assertEquals(1, result.getId());
+        assertEquals("React Router", result.getTitle());
+        assertEquals("content", result.getContent());
+        assertFalse(result.getIsPublic());
+        assertEquals("user", result.getUsername());
+        assertEquals(1, result.getCategoryId());
+
+        verify(noteDao).getById(1);
+        verify(noteDao).update(1, updatedNote);
+    }
+
+    @Test
+    void update_shouldThrowForbidden_whenUserIsNotOwnerNorAdmin() {
+        Note existingNote = new Note();
+        existingNote.setId(2);
+        existingNote.setUsername("user");
+
+        Note updatedNote = new Note();
+        updatedNote.setId(2);
+        updatedNote.setTitle("React Router");
+        updatedNote.setContent("");
+        updatedNote.setUsername("user2");
+
+        Authentication authentication = mock(Authentication.class);
+
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("user2");
+        when(authentication.getAuthorities())
+                .thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("USER")));
+        when(noteDao.getById(2)).thenReturn(Optional.of(existingNote));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> noteService.update(2, updatedNote, authentication));
+
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+        verify(noteDao, never()).update(2, updatedNote);
+    }
+
+    @Test
     void delete_shouldReturnDeletedRowCount_whenNoteExists() {
         when(noteDao.getById(1)).thenReturn(Optional.of(note));
         when(noteDao.delete(1)).thenReturn(1);
@@ -350,5 +408,39 @@ class NoteServiceTest {
                 () -> noteService.delete(100, authentication));
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         verify(noteDao, never()).delete(100);
+    }
+
+    @Test
+    void delete_ReturnDeletedRowCount_whenUserIsAdmin() {
+        Authentication authentication = mock(Authentication.class);
+
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("admin");
+        when(authentication.getAuthorities())
+                .thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("ADMIN")));
+        when(noteDao.getById(1)).thenReturn(Optional.of(note));
+        when(noteDao.delete(1)).thenReturn(1);
+
+        int deletedCount = noteService.delete(1, authentication);
+        assertEquals(1, deletedCount);
+        verify(noteDao).delete(1);
+    }
+
+    @Test
+    void delete_shouldThrowForbidden_whenUserIsNotOwnerNorAdmin() {
+        Authentication authentication = mock(Authentication.class);
+
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("user2");
+        when(authentication.getAuthorities())
+                .thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("USER")));
+        when(noteDao.getById(1)).thenReturn(Optional.of(note));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> noteService.delete(1, authentication));
+
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+        verify(noteDao, never()).delete(1);
     }
 }
