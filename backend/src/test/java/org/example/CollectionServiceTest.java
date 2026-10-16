@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.server.ResponseStatusException;
 
 class CollectionServiceTest {
@@ -56,8 +57,8 @@ class CollectionServiceTest {
         collectionDao = Mockito.mock(CollectionDao.class);
         noteDao = Mockito.mock(NoteDao.class);
         authentication = Mockito.mock(Authentication.class);
-        authorizationService = Mockito.mock(AuthorizationService.class);
 
+        authorizationService = new AuthorizationService();
         collectionService = new CollectionService(
                 collectionDao,
                 noteDao,
@@ -228,18 +229,22 @@ class CollectionServiceTest {
         updatedCollection.setName("My Best 2026");
         updatedCollection.setDescription("description");
         updatedCollection.setIsPublic(false);
-        updatedCollection.setUsername("admin");
+        updatedCollection.setUsername("user");
 
         when(collectionDao.getById(1)).thenReturn(Optional.of(collection));
         when(collectionDao.update(1, updatedCollection)).thenReturn(updatedCollection);
+
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn("admin");
+        when(authentication.getAuthorities())
+                .thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("ADMIN")));
 
         Collection result = collectionService.update(1, updatedCollection, authentication);
         assertEquals(1, result.getId());
         assertEquals("My Best 2026", result.getName());
         assertEquals("description", result.getDescription());
         assertFalse(result.getIsPublic());
-        assertEquals("admin", result.getUsername());
+        assertEquals("user", result.getUsername());
 
         verify(collectionDao).getById(1);
         verify(collectionDao).update(1, updatedCollection);
@@ -251,6 +256,7 @@ class CollectionServiceTest {
         updatedCollection.setName("My Best 2026");
 
         when(collectionDao.getById(100)).thenReturn(Optional.empty());
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn("user");
 
         ResponseStatusException exception = assertThrows(
@@ -264,6 +270,7 @@ class CollectionServiceTest {
     @Test
     void update_shouldThrowBadRequest_whenNameIsBlank() {
         when(collectionDao.getById(1)).thenReturn(Optional.of(collection));
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn("user");
 
         Collection updatedEmptyNameCollection = new Collection();
@@ -283,10 +290,64 @@ class CollectionServiceTest {
     }
 
     @Test
+    void update_shouldReturnUpdatedCollection_whenUserIsAdmin() {
+        Collection updatedCollection = new Collection();
+        updatedCollection.setId(1);
+        updatedCollection.setName("My Best 2026");
+        updatedCollection.setDescription("description");
+        updatedCollection.setIsPublic(false);
+        updatedCollection.setUsername("user");
+
+        when(collectionDao.getById(1)).thenReturn(Optional.of(collection));
+        when(collectionDao.update(1, updatedCollection)).thenReturn(updatedCollection);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("admin");
+        when(authentication.getAuthorities())
+                .thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("ADMIN")));
+
+        Collection result = collectionService.update(1, updatedCollection, authentication);
+        assertEquals(1, result.getId());
+        assertEquals("My Best 2026", result.getName());
+        assertEquals("description", result.getDescription());
+        assertFalse(result.getIsPublic());
+        assertEquals("user", result.getUsername());
+
+        verify(collectionDao).getById(1);
+        verify(collectionDao).update(1, updatedCollection);
+    }
+
+    @Test
+    void update_shouldThrowForbidden_whenUserIsNotOwnerNorAdmin() {
+        Collection updatedCollection = new Collection();
+        updatedCollection.setId(1);
+        updatedCollection.setName("My Best 2026");
+        updatedCollection.setDescription("description");
+        updatedCollection.setIsPublic(false);
+        updatedCollection.setUsername("user");
+
+        when(collectionDao.getById(collection.getId())).thenReturn(Optional.of(updatedCollection));
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("user2");
+        when(authentication.getAuthorities())
+                .thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("USER")));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> collectionService.update(collection.getId(), updatedCollection, authentication));
+
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+        verify(collectionDao, never()).update(collection.getId(), updatedCollection);
+    }
+
+    @Test
     void delete_shouldReturnDeletedRowCount_whenCollectionExists() {
         when(collectionDao.getById(1)).thenReturn(Optional.of(collection));
         when(collectionDao.delete(1)).thenReturn(1);
+
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn("user");
+        when(authentication.getAuthorities())
+                .thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("USER")));
 
         int deletedCount = collectionService.delete(1, authentication);
         assertEquals(1, deletedCount);
@@ -305,6 +366,39 @@ class CollectionServiceTest {
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         verify(collectionDao).getById(100);
         verify(collectionDao, never()).delete(100);
+    }
+
+    @Test
+    void delete_shouldThrowForbidden_whenUserIsNotOwnerNorAdmin() {
+        when(collectionDao.getById(1)).thenReturn(Optional.of(collection));
+        when(collectionDao.delete(1)).thenReturn(1);
+
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("user2");
+        when(authentication.getAuthorities())
+                .thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("USER")));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> collectionService.delete(1, authentication));
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+
+        verify(collectionDao, never()).delete(1);
+    }
+
+    @Test
+    void delete_shouldReturnDeletedRowCount_whenUserIsAdmin() {
+        when(collectionDao.getById(1)).thenReturn(Optional.of(collection));
+        when(collectionDao.delete(1)).thenReturn(1);
+
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("admin");
+        when(authentication.getAuthorities())
+                .thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("ADMIN")));
+
+        int deletedCount = collectionService.delete(1, authentication);
+        assertEquals(1, deletedCount);
+        verify(collectionDao).delete(1);
     }
 
     // ======================
@@ -377,7 +471,11 @@ class CollectionServiceTest {
         when(collectionDao.addNoteToCollection(
                 collection.getId(),
                 note.getId())).thenReturn(List.of(note, existingNote));
+
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn("user");
+        when(authentication.getAuthorities())
+                .thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("USER")));
 
         List<Note> result = collectionService.addNoteToCollection(
                 collection.getId(),
@@ -417,6 +515,7 @@ class CollectionServiceTest {
                 collection.getId(),
                 note.getId()))
                 .thenReturn(true);
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn("user");
 
         ResponseStatusException exception = assertThrows(
@@ -447,6 +546,7 @@ class CollectionServiceTest {
         verify(collectionDao).getById(100);
         verify(collectionDao, never())
                 .addNoteToCollection(100, note.getId());
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn("user");
     }
 
@@ -456,6 +556,7 @@ class CollectionServiceTest {
                 .thenReturn(Optional.of(collection));
         when(noteDao.getById(100))
                 .thenReturn(Optional.empty());
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn("user");
 
         ResponseStatusException exception = assertThrows(
@@ -471,6 +572,96 @@ class CollectionServiceTest {
     }
 
     @Test
+    void addNoteToCollection_shouldAddNote_whenUserIsAdmin() {
+        Note existingNote = new Note();
+        existingNote.setId(2);
+        existingNote.setTitle("React Router");
+        existingNote.setContent("content");
+        existingNote.setUsername("admin");
+        existingNote.setCategoryId(1);
+
+        when(collectionDao.getById(collection.getId()))
+                .thenReturn(Optional.of(collection));
+        when(noteDao.getById(note.getId()))
+                .thenReturn(Optional.of(note));
+        when(collectionDao.existsNoteInCollection(
+                collection.getId(),
+                note.getId())).thenReturn(false);
+        when(collectionDao.addNoteToCollection(
+                collection.getId(),
+                note.getId())).thenReturn(List.of(note, existingNote));
+
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("admin");
+        when(authentication.getAuthorities())
+                .thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("ADMIN")));
+
+        List<Note> result = collectionService.addNoteToCollection(
+                collection.getId(),
+                note.getId(),
+                authentication);
+        assertEquals(2, result.size());
+        // 1
+        assertEquals(1, result.get(0).getId());
+        assertEquals(NOTE_TITLE, result.get(0).getTitle());
+        assertEquals("", result.get(0).getContent());
+        assertTrue(result.get(0).getIsPublic());
+        assertEquals("user", result.get(0).getUsername());
+        assertEquals(1, result.get(0).getCategoryId());
+        // 2
+        assertEquals(2, result.get(1).getId());
+        assertEquals("React Router", result.get(1).getTitle());
+        assertEquals("content", result.get(1).getContent());
+        assertFalse(result.get(1).getIsPublic());
+        assertEquals("admin", result.get(1).getUsername());
+        assertEquals(1, result.get(1).getCategoryId());
+
+        verify(collectionDao).getById(collection.getId());
+        verify(noteDao).getById(note.getId());
+        verify(collectionDao)
+                .existsNoteInCollection(collection.getId(), note.getId());
+        verify(collectionDao)
+                .addNoteToCollection(collection.getId(), note.getId());
+    }
+
+    @Test
+    void addNoteToCollection_shouldThrowForbidden_whenUserIsNotOwnerNorAdmin() {
+        Note existingNote = new Note();
+        existingNote.setId(2);
+        existingNote.setTitle("React Router");
+        existingNote.setContent("content");
+        existingNote.setUsername("admin");
+        existingNote.setCategoryId(1);
+
+        when(collectionDao.getById(collection.getId()))
+                .thenReturn(Optional.of(collection));
+        when(noteDao.getById(note.getId()))
+                .thenReturn(Optional.of(note));
+        when(collectionDao.existsNoteInCollection(
+                collection.getId(),
+                note.getId())).thenReturn(false);
+        when(collectionDao.addNoteToCollection(
+                collection.getId(),
+                note.getId())).thenReturn(List.of(note, existingNote));
+
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("user2");
+        when(authentication.getAuthorities())
+                .thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("USER")));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> collectionService.addNoteToCollection(
+                        collection.getId(),
+                        note.getId(),
+                        authentication));
+
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+        verify(collectionDao).getById(collection.getId());
+        verify(collectionDao, never()).addNoteToCollection(collection.getId(), note.getId());
+    }
+
+    @Test
     void removeNoteFromCollection_shouldReturnDeletedRowCount_whenNoteIsInCollection() {
         when(collectionDao.getById(collection.getId()))
                 .thenReturn(Optional.of(collection));
@@ -478,6 +669,7 @@ class CollectionServiceTest {
                 collection.getId(),
                 note.getId()))
                 .thenReturn(1);
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn("user");
 
         int result = collectionService.removeNoteFromCollection(
@@ -495,6 +687,7 @@ class CollectionServiceTest {
     @Test
     void removeNoteFromCollection_shouldThrowNotFound_whenCollectionDoesNotExist() {
         when(collectionDao.getById(100)).thenReturn(Optional.empty());
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn("user");
 
         ResponseStatusException exception = assertThrows(
@@ -520,6 +713,7 @@ class CollectionServiceTest {
                 collection.getId(),
                 100))
                 .thenReturn(0);
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getName()).thenReturn("user");
 
         ResponseStatusException exception = assertThrows(
@@ -531,7 +725,59 @@ class CollectionServiceTest {
                 HttpStatus.NOT_FOUND,
                 exception.getStatusCode());
         verify(collectionDao).getById(collection.getId());
+        verify(collectionDao)
+                .removeNoteFromCollection(collection.getId(), 100);
+    }
+
+    @Test
+    void removeNoteFromCollection_shouldReturnDeletedRowCount_whenUserIsAdmin() {
+        when(collectionDao.getById(collection.getId()))
+                .thenReturn(Optional.of(collection));
+        when(collectionDao.removeNoteFromCollection(
+                collection.getId(),
+                note.getId()))
+                .thenReturn(1);
+
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("admin");
+        when(authentication.getAuthorities())
+                .thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("ADMIN")));
+
+        int result = collectionService.removeNoteFromCollection(
+                collection.getId(),
+                note.getId(),
+                authentication);
+
+        assertEquals(1, result);
+        verify(collectionDao).getById(collection.getId());
         verify(collectionDao).removeNoteFromCollection(
-                collection.getId(), 100);
+                collection.getId(),
+                note.getId());
+    }
+
+    @Test
+    void removeNoteFromCollection_shouldThrowForbidden_whenUserIsNotOwnerNorAdmin() {
+        when(collectionDao.getById(collection.getId()))
+                .thenReturn(Optional.of(collection));
+        when(collectionDao.removeNoteFromCollection(
+                collection.getId(),
+                note.getId()))
+                .thenReturn(0);
+
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("user2");
+        when(authentication.getAuthorities())
+                .thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("USER")));
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> collectionService.removeNoteFromCollection(
+                        collection.getId(), note.getId(), authentication));
+
+        assertEquals(
+                HttpStatus.FORBIDDEN,
+                exception.getStatusCode());
+        verify(collectionDao).getById(collection.getId());
+        verify(collectionDao, never())
+                .removeNoteFromCollection(collection.getId(), note.getId());
     }
 }
