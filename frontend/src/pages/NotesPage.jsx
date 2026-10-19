@@ -300,6 +300,7 @@ function NotesPage() {
       {/* Buttons */}
       <div className="d-flex gap-2 mb-4">
         <button
+          id="search"
           className="btn btn-primary"
           type="button"
           onClick={handleSearch}
@@ -308,6 +309,7 @@ function NotesPage() {
         </button>
 
         <button
+          id="clear"
           className="btn btn-outline-primary"
           type="button"
           onClick={handleClear}
@@ -316,6 +318,7 @@ function NotesPage() {
         </button>
 
         <Link
+          id="newNote"
           className="btn btn-outline-primary"
           to="/notes/new"
         >
@@ -331,11 +334,12 @@ function NotesPage() {
       )}
 
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <span className="text-muted">
+        <span className="notes-count text-muted">
           {displayedNotes.length} note(s)
         </span>
 
         <button
+          id="sortDirection"
           type="button"
           className="btn btn-sm btn-outline-secondary"
           onClick={handleSortDirection}
