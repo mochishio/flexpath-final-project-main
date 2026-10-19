@@ -1,5 +1,8 @@
 module.exports = {
     testEnvironment: "node",
-    transform: {},
+    extensionsToTreatAsEsm: [".jsx"],
+    transform: {
+      "^.+\\.jsx$": "<rootDir>/jest-transformer.cjs",
+    },
     testMatch: ["**/*.test.js"],
   };
