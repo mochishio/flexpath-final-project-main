@@ -93,11 +93,11 @@ export function CollectionCard({
               {addVisibilityIcon(collection.isPublic, collection.name)}
             </h5>
 
-            <div className="mb-2">
+            <div className="username mb-2">
               by {collection.username}
             </div>
 
-            <p className="mb-2">
+            <p className="description mb-2">
               {collection.description}
             </p>
 
