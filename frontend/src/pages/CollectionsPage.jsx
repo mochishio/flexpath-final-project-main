@@ -61,9 +61,17 @@ function CollectionsPage() {
         const notesByCollectionData = {};
         const allCollections = [...myData, ...otherPublicCollections];
         for (const collection of allCollections) {
-          const notes = await fetchJson(
+          let notes = await fetchJson(
             `http://localhost:8080/api/collections/${collection.id}/notes`
           );
+          if (otherPublicCollections.some(
+            (publicCollection) => publicCollection.id === collection.id
+          )) {
+            notes = notes.filter(
+              (note) =>
+                note.isPublic === true || note.username === currentUsername
+            );
+          }
           notesByCollectionData[collection.id] = notes;
         }
         setNotesByCollection(notesByCollectionData);
