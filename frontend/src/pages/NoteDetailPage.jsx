@@ -11,8 +11,9 @@ function NoteDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { currentUser } = useAuth();
+  const { currentUser, currentUserRoles } = useAuth();
   const currentUsername = currentUser?.username;
+  const isAdmin = currentUserRoles.includes("ADMIN");
 
   const [note, setNote] = useState(null);
   const [category, setCategory] = useState(null);
@@ -32,6 +33,12 @@ function NoteDetailPage() {
       try {
         // load notes
         const data = await fetchJson(`http://localhost:8080/api/notes/${id}`);
+        const isOwner = data.username === currentUsername;
+
+        if (!isAdmin && !isOwner && !data.isPublic) {
+          navigate("/404");
+          return;
+        }
         setNote(data);
 
         // load categories
@@ -209,7 +216,7 @@ function NoteDetailPage() {
     return null;
   }
 
-  const isOwner = note.username === currentUsername;
+  const isOwner = note?.username === currentUsername;
 
   return (
     <main className="container mt-4">
