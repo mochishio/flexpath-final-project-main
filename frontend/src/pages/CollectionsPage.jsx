@@ -195,7 +195,9 @@ function CollectionsPage() {
         return collection;
       });
       setMyCollections(updatedCollections);
-      setDisplayedMyCollections(updatedCollections);
+      let myResult = [...updatedCollections];
+      myResult = sortCollections(updatedCollections);
+      setDisplayedMyCollections(myResult);
   }
 
   function handleCollectionDeleted(collectionId) {
