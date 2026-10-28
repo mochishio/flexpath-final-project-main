@@ -82,19 +82,25 @@ insert into roles (username, role) values ('user', 'USER');
 insert into users (username, password) values ('user2', '$2a$10$P3M6cTgjgl/4Dksy7RoYD.IqsU3P67XxtViD6.gLrdvO9KI1w1YMu');
 insert into roles (username, role) values ('user2', 'USER');
 -- public/private notes by regular user
-insert into notes
-    (title, content, is_public, username, category_id)
-values ('Create Database', '', true, 'user', (select id from categories where name = 'MySQL'));
-insert into notes
-    (title, content, is_public, username, category_id)
-values ('React Router', '', false, 'user', (select id from categories where name = 'React'));
+insert into notes (title, content, is_public, username, category_id)
+values
+    ('Create Database', '', true, 'user', (select id from categories where name = 'MySQL')),
+    ('React Router', '', false, 'user', (select id from categories where name = 'React'));
 -- public/private notes by another user
-insert into notes
-    (title, content, is_public, username, category_id)
-values ('Bootstrap', '', true, 'user2', (select id from categories where name = 'CSS'));
-insert into notes
-    (title, content, is_public, username, category_id)
-values ('div, span, a', '', false, 'user2', (select id from categories where name = 'HTML'));
+insert into notes (title, content, is_public, username, category_id)
+values
+    ('Bootstrap', '', true, 'user2', (select id from categories where name = 'CSS')),
+    ('div, span, a', '', false, 'user2', (select id from categories where name = 'HTML')),
+    ('Flexbox', '', true, 'user2', (SELECT id FROM categories WHERE name = 'CSS')),
+    ('CSS Grid', '', false, 'user2', (SELECT id FROM categories WHERE name = 'CSS')),
+    ('HTML Forms', '', true, 'user2', (SELECT id FROM categories WHERE name = 'HTML')),
+    ('Java Collections', '', false, 'user2', (SELECT id FROM categories WHERE name = 'Java')),
+    ('JavaScript Promise', '', true, 'user2', (SELECT id FROM categories WHERE name = 'JavaScript')),
+    ('JavaScript async/await', '', false, 'user2',(SELECT id FROM categories WHERE name = 'JavaScript')),
+    ('MySQL JOIN', '', true, 'user2', (SELECT id FROM categories WHERE name = 'MySQL')),
+    ('Maven Dependencies', '', false, 'user2', (SELECT id FROM categories WHERE name = 'Maven')),
+    ('React Hooks', '', true, 'user2', (SELECT id FROM categories WHERE name = 'React')),
+    ('Spring Boot REST API', '', false, 'user2', (SELECT id FROM categories WHERE name = 'Spring Boot'));
 -- public/private collections
 insert into collections (name, is_public, username) values ('Read Later', false, 'user');
 insert into collections (name, is_public, username) values ('My Best 2026', true, 'user');
