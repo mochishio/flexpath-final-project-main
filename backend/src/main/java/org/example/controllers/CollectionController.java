@@ -2,6 +2,7 @@ package org.example.controllers;
 
 import org.example.models.Collection;
 import org.example.models.Note;
+import org.example.services.AuditLogService;
 import org.example.services.CollectionService;
 import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
@@ -16,9 +17,13 @@ import java.util.List;
 public class CollectionController {
 
     private final CollectionService collectionService;
+    private final AuditLogService auditLogService;
 
-    public CollectionController(CollectionService collectionService) {
+    public CollectionController(
+            CollectionService collectionService,
+            AuditLogService auditLogService) {
         this.collectionService = collectionService;
+        this.auditLogService = auditLogService;
     }
 
     @GetMapping
@@ -44,8 +49,17 @@ public class CollectionController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public Collection create(@RequestBody Collection collection) {
-        return collectionService.create(collection);
+    public Collection create(
+            @RequestBody Collection collection,
+            Authentication authentication) {
+        Collection createdCollection = collectionService.create(collection);
+        auditLogService.log(
+                authentication.getName(),
+                "CREATE",
+                "COLLECTION",
+                createdCollection.getId(),
+                "");
+        return createdCollection;
     }
 
     @PutMapping("/{id}")
@@ -54,7 +68,12 @@ public class CollectionController {
             @PathVariable int id,
             @RequestBody Collection collection,
             Authentication authentication) {
-
+        auditLogService.log(
+                authentication.getName(),
+                "UPDATE",
+                "COLLECTION",
+                id,
+                "");
         return collectionService.update(id, collection, authentication);
     }
 
@@ -63,6 +82,12 @@ public class CollectionController {
     public int delete(
             @PathVariable int id,
             Authentication authentication) {
+        auditLogService.log(
+                authentication.getName(),
+                "DELETE",
+                "COLLECTION",
+                id,
+                "");
         return collectionService.delete(id, authentication);
     }
 
@@ -81,6 +106,12 @@ public class CollectionController {
             @PathVariable int collectionId,
             @PathVariable int noteId,
             Authentication authentication) {
+        auditLogService.log(
+                authentication.getName(),
+                "ADD_NOTE",
+                "COLLECTION",
+                collectionId,
+                "noteId=" + noteId);
         return collectionService.addNoteToCollection(
                 collectionId, noteId, authentication);
     }
@@ -91,6 +122,12 @@ public class CollectionController {
             @PathVariable int collectionId,
             @PathVariable int noteId,
             Authentication authentication) {
+        auditLogService.log(
+                authentication.getName(),
+                "REMOVE_NOTE",
+                "COLLECTION",
+                collectionId,
+                "noteId=" + noteId);
         return collectionService.removeNoteFromCollection(
                 collectionId,
                 noteId,
