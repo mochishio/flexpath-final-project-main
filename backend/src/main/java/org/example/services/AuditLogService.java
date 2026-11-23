@@ -7,14 +7,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuditLogService {
     private static final Logger logger = LoggerFactory.getLogger("AUDIT_LOG");
+
     public void log(
             String username,
             String action,
             String targetType,
-            Integer targetId) {
+            Integer targetId,
+            String details) {
         logger.info(
-            "username={} action={} targetType={} targetId={}",
-            username, action, targetType, targetId
-        );
+                "username={} action={} targetType={} targetId={}, details={}",
+                username, action, targetType, targetId, details);
     }
 }

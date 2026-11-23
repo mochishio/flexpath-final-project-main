@@ -50,11 +50,11 @@ public class NoteController {
     public Note create(@RequestBody Note note, Authentication authentication) {
         Note createdNote = noteService.create(note);
         auditLogService.log(
-            authentication.getName(),
-            "CREATE",
-            "NOTE",
-            createdNote.getId()
-        );
+                authentication.getName(),
+                "CREATE",
+                "NOTE",
+                createdNote.getId(),
+                "");
         return createdNote;
     }
 
@@ -64,6 +64,12 @@ public class NoteController {
             @PathVariable int id,
             @RequestBody Note note,
             Authentication authentication) {
+        auditLogService.log(
+                authentication.getName(),
+                "UPDATE",
+                "NOTE",
+                id,
+                "");
         return noteService.update(id, note, authentication);
     }
 
@@ -72,6 +78,12 @@ public class NoteController {
     public int delete(
             @PathVariable int id,
             Authentication authentication) {
+        auditLogService.log(
+                authentication.getName(),
+                "DELETE",
+                "NOTE",
+                id,
+                "");
         return noteService.delete(id, authentication);
     }
 }
