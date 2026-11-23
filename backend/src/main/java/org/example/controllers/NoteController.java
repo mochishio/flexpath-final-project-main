@@ -2,6 +2,7 @@ package org.example.controllers;
 
 import org.example.models.Collection;
 import org.example.models.Note;
+import org.example.services.AuditLogService;
 import org.example.services.NoteService;
 import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
@@ -16,9 +17,11 @@ import java.util.List;
 public class NoteController {
 
     private final NoteService noteService;
+    private final AuditLogService auditLogService;
 
-    public NoteController(NoteService noteService) {
+    public NoteController(NoteService noteService, AuditLogService auditLogService) {
         this.noteService = noteService;
+        this.auditLogService = auditLogService;
     }
 
     @GetMapping
@@ -44,8 +47,15 @@ public class NoteController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public Note create(@RequestBody Note note) {
-        return noteService.create(note);
+    public Note create(@RequestBody Note note, Authentication authentication) {
+        Note createdNote = noteService.create(note);
+        auditLogService.log(
+            authentication.getName(),
+            "CREATE",
+            "NOTE",
+            createdNote.getId()
+        );
+        return createdNote;
     }
 
     @PutMapping("/{id}")
